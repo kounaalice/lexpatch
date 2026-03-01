@@ -1,7 +1,11 @@
 {
-  // Cloudflare Pages 設定
+  // Cloudflare Workers 設定（@opennextjs/cloudflare）
   "name": "lexpatch",
+  "main": ".open-next/worker.js",
   "compatibility_date": "2025-01-01",
   "compatibility_flags": ["nodejs_compat"],
-  "pages_build_output_dir": ".open-next/assets"
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  }
 }

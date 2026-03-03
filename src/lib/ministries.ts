@@ -167,7 +167,7 @@ const TITLE_MINISTRY_RULES: [RegExp, MinistryLink][] = [
     { name: "財務省（国税庁）", url: "https://www.nta.go.jp/", lawPageUrl: "https://www.nta.go.jp/law/index.htm" }],
   [/関税|外国為替|貿易/,
     { name: "財務省", url: "https://www.mof.go.jp/", lawPageUrl: "https://www.mof.go.jp/about_mof/bills/index.htm" }],
-  [/財政|予算|公債|国有財産|地方財政/,
+  [/財政|予算|公債|国有財産/,
     { name: "財務省", url: "https://www.mof.go.jp/", lawPageUrl: "https://www.mof.go.jp/about_mof/bills/index.htm" }],
 
   // 金融庁
@@ -177,7 +177,7 @@ const TITLE_MINISTRY_RULES: [RegExp, MinistryLink][] = [
   // 総務省
   [/電気通信|放送|電波|無線|インターネット|郵便/,
     { name: "総務省", url: "https://www.soumu.go.jp/", lawPageUrl: "https://www.soumu.go.jp/main_sosiki/joho_tsusin/d_syohi/houki.html" }],
-  [/地方自治|地方公務員|国家公務員|行政手続|行政不服|行政代執行|国家行政組織|個人情報|番号法|マイナ|公職選挙|地方税|情報公開/,
+  [/地方自治|地方公務員|国家公務員|行政手続|行政不服|行政代執行|国家行政組織|個人情報|番号法|マイナ|公職選挙|地方税|地方財政|情報公開/,
     { name: "総務省", url: "https://www.soumu.go.jp/", lawPageUrl: "https://www.soumu.go.jp/main_sosiki/joho_tsusin/d_syohi/houki.html" }],
 
   // 文部科学省

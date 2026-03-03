@@ -7,7 +7,11 @@ export async function GET(request: NextRequest) {
 
   try {
     const data = await searchLaws(q);
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+      },
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "不明なエラー";
     return NextResponse.json({ error: message }, { status: 500 });

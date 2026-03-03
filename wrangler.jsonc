@@ -7,5 +7,18 @@
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
-  }
+  },
+  // R2 バケットバインディング（ISR/Data Cache 永続化用）
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "lexpatch-cache"
+    }
+  ],
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "lexcard.jp", "custom_domain": true },
+    { "pattern": "www.lexcard.jp", "custom_domain": true },
+    { "pattern": "lexpatch.tapitapitrip.jp/*", "zone_name": "tapitapitrip.jp" }
+  ]
 }

@@ -8,7 +8,11 @@ export async function GET(
   const { lawId } = await params;
   try {
     const data = await getLawData(lawId);
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: {
+        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
+      },
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "不明なエラー";
     return NextResponse.json({ error: message }, { status: 500 });

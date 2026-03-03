@@ -1,9 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import type { LawSearchResult } from "@/lib/egov/types";
 import { CATEGORY_GROUPS, LAW_CATEGORIES } from "@/lib/categories";
+import { getRecentLaws, type HistoryEntry } from "@/lib/history";
+import { getFollowedIds } from "@/lib/follows";
+import { isLoggedIn } from "@/lib/session";
+import HomepageStats from "@/components/HomepageStats";
+
+const POPULAR_LAWS: { title: string; num: string; type: string; lawId: string }[] = [
+  // ── 六法 ──
+  { title: "日本国憲法",       num: "昭和21年",              type: "憲法",   lawId: "321CONSTITUTION" },
+  { title: "民法",             num: "明治29年法律第89号",     type: "法律",   lawId: "129AC0000000089" },
+  { title: "刑法",             num: "明治40年法律第45号",     type: "法律",   lawId: "140AC0000000045" },
+  { title: "商法",             num: "明治32年法律第48号",     type: "法律",   lawId: "132AC0000000048" },
+  { title: "会社法",           num: "平成17年法律第86号",     type: "法律",   lawId: "417AC0000000086" },
+  { title: "民事訴訟法",       num: "平成8年法律第109号",     type: "法律",   lawId: "408AC0000000109" },
+  { title: "刑事訴訟法",       num: "昭和23年法律第131号",    type: "法律",   lawId: "323AC0000000131" },
+  { title: "行政手続法",       num: "平成5年法律第88号",      type: "法律",   lawId: "405AC0000000088" },
+  // ── 実務主要法令 ──
+  { title: "労働基準法",       num: "昭和22年法律第49号",     type: "法律",   lawId: "322AC0000000049" },
+  { title: "著作権法",         num: "昭和45年法律第48号",     type: "法律",   lawId: "345AC0000000048" },
+  { title: "個人情報保護法",   num: "平成15年法律第57号",     type: "法律",   lawId: "415AC0000000057" },
+  { title: "国家公務員法",     num: "昭和22年法律第120号",    type: "法律",   lawId: "322AC0000000120" },
+  // ── 税法・経済 ──
+  { title: "所得税法",         num: "昭和40年法律第33号",     type: "法律",   lawId: "340AC0000000033" },
+  { title: "法人税法",         num: "昭和40年法律第34号",     type: "法律",   lawId: "340AC0000000034" },
+  { title: "消費税法",         num: "昭和63年法律第108号",    type: "法律",   lawId: "363AC0000000108" },
+  { title: "金融商品取引法",   num: "昭和23年法律第25号",     type: "法律",   lawId: "323AC0000000025" },
+  // ── 不動産・知財・倒産 ──
+  { title: "不動産登記法",     num: "平成16年法律第123号",    type: "法律",   lawId: "416AC0000000123" },
+  { title: "借地借家法",       num: "平成3年法律第90号",      type: "法律",   lawId: "403AC0000000090" },
+  { title: "特許法",           num: "昭和34年法律第121号",    type: "法律",   lawId: "334AC0000000121" },
+  { title: "破産法",           num: "平成16年法律第75号",     type: "法律",   lawId: "416AC0000000075" },
+  // ── 行政・社会・生活 ──
+  { title: "地方自治法",       num: "昭和22年法律第67号",     type: "法律",   lawId: "322AC0000000067" },
+  { title: "独占禁止法",       num: "昭和22年法律第54号",     type: "法律",   lawId: "322AC0000000054" },
+  { title: "道路交通法",       num: "昭和35年法律第105号",    type: "法律",   lawId: "335AC0000000105" },
+  { title: "介護保険法",       num: "平成9年法律第123号",     type: "法律",   lawId: "409AC0000000123" },
+];
+
+const LAW_TYPE_JA: Record<string, string> = {
+  Act: "法律",
+  CabinetOrder: "政令",
+  ImperialOrder: "勅令",
+  MinisterialOrdinance: "省令",
+  Rule: "規則",
+  Misc: "告示等",
+};
+
+
+type TypeFilter = "" | "Act" | "CabinetOrder" | "MinisterialOrdinance" | "Rule";
 
 export default function Home() {
   const [query, setQuery] = useState("");
@@ -11,15 +59,20 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("");
+  const [loggedIn, setLoggedIn] = useState(false);
 
-  async function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    if (!query.trim()) return;
+  useEffect(() => { setLoggedIn(isLoggedIn()); }, []);
+
+  async function doSearch(q: string) {
+    if (!q.trim()) return;
+    setQuery(q);
     setLoading(true);
     setError(null);
     setSearched(true);
+    setTypeFilter("");
     try {
-      const res = await fetch(`/api/egov/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/egov/search?q=${encodeURIComponent(q)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "検索エラー");
       setResults(data.laws ?? []);
@@ -31,66 +84,142 @@ export default function Home() {
     }
   }
 
+  async function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    await doSearch(query);
+  }
+
   return (
     <div style={{ backgroundColor: "var(--color-bg)", minHeight: "100%" }}>
 
-      {/* ヒーロー + 検索 */}
+      {/* ── ヒーロー ── */}
       <div style={{
-        backgroundColor: "var(--color-surface)",
-        borderBottom: "1px solid var(--color-border)",
-        padding: "2rem",
+        background: "linear-gradient(160deg, #EFF8FF 0%, #DBEAFE 55%, #BFDBFE 100%)",
+        padding: "3.5rem 2rem 3rem",
+        position: "relative",
+        overflow: "hidden",
       }}>
-        <div style={{ maxWidth: "700px", margin: "0 auto", textAlign: "center" }}>
-          <h1 style={{
-            fontFamily: "var(--font-serif)",
-            fontSize: "clamp(1.5rem, 3.5vw, 2.2rem)",
-            color: "var(--color-text-primary)",
-            lineHeight: 1.4,
-            marginBottom: "0.5rem",
+        {/* 装飾：ソフトサークル */}
+        <div style={{
+          position: "absolute",
+          top: "-80px",
+          right: "-80px",
+          width: "360px",
+          height: "360px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(255,255,255,0.65) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+        <div style={{
+          position: "absolute",
+          bottom: "-50px",
+          left: "-50px",
+          width: "240px",
+          height: "240px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(147,197,253,0.25) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+        <div style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "1px",
+          background: "linear-gradient(90deg, transparent, rgba(147,197,253,0.5), transparent)",
+        }} />
+
+        <div style={{ maxWidth: "720px", margin: "0 auto", textAlign: "center", position: "relative" }}>
+
+          {/* バッジ */}
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.25rem 0.85rem",
+            backgroundColor: "rgba(255,255,255,0.75)",
+            border: "1px solid #93C5FD",
+            borderRadius: "4px",
+            fontFamily: "var(--font-sans)",
+            fontSize: "0.73rem",
+            color: "#0369A1",
+            marginBottom: "1.5rem",
+            letterSpacing: "0.03em",
           }}>
-            逐条パッチ記法で法令改正案を提案・議論する
+            e-Gov法令API準拠
+            <span style={{ color: "#BAE6FD" }}>|</span>
+            無料・登録不要
+          </div>
+
+          {/* メインタイトル */}
+          <h1 style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "clamp(1.7rem, 4vw, 2.6rem)",
+            color: "#1E3A5F",
+            lineHeight: 1.4,
+            marginBottom: "0.85rem",
+            fontWeight: 700,
+            letterSpacing: "-0.01em",
+          }}>
+            現行法令の検索・条文閲覧
           </h1>
+
+          {/* サブタイトル */}
           <p style={{
             fontFamily: "var(--font-sans)",
-            fontSize: "0.875rem",
-            color: "var(--color-text-secondary)",
-            marginBottom: "1.5rem",
+            fontSize: "0.9rem",
+            color: "#4B6A8A",
+            marginBottom: "2rem",
+            lineHeight: 1.85,
           }}>
-            e-Gov法令データから現行法を取得し、+/− 記法で改正案を作成・議論できます
+            e-Gov法令APIに基づく日本の現行法律・政令・省令等の全条文を提供しています。<br />
+            改正案の作成・共有にも対応しています。
           </p>
 
           {/* 検索フォーム */}
-          <form onSubmit={handleSearch} style={{ display: "flex", gap: "0.5rem", maxWidth: "520px", margin: "0 auto" }}>
+          <form onSubmit={handleSearch} style={{
+            display: "flex",
+            gap: "0.5rem",
+            maxWidth: "560px",
+            margin: "0 auto",
+          }}>
+            <label htmlFor="hero-search" className="sr-only">法令名で検索</label>
             <input
+              id="hero-search"
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="法令名で検索（例：民法、労働基準法）"
+              className="hero-search-input"
               style={{
                 flex: 1,
-                padding: "0.7rem 1rem",
-                border: "1px solid var(--color-border)",
-                borderRadius: "6px",
-                backgroundColor: "var(--color-bg)",
-                color: "var(--color-text-primary)",
+                padding: "0.875rem 1.25rem",
+                border: "1px solid #93C5FD",
+                borderRadius: "8px",
+                backgroundColor: "#FFFFFF",
+                color: "#1E3A5F",
                 fontFamily: "var(--font-sans)",
                 fontSize: "0.95rem",
                 outline: "none",
+                boxShadow: "0 1px 4px rgba(30,58,95,0.08)",
               }}
             />
             <button
               type="submit"
               disabled={loading}
               style={{
-                padding: "0.7rem 1.25rem",
-                backgroundColor: loading ? "var(--color-text-secondary)" : "var(--color-accent)",
+                padding: "0.875rem 1.5rem",
+                backgroundColor: loading ? "#7FBCE8" : "#0369A1",
                 color: "#fff",
                 border: "none",
-                borderRadius: "6px",
+                borderRadius: "8px",
                 fontFamily: "var(--font-sans)",
                 fontSize: "0.95rem",
+                fontWeight: 700,
                 cursor: loading ? "not-allowed" : "pointer",
                 whiteSpace: "nowrap",
+                transition: "background-color 0.15s",
+                boxShadow: loading ? "none" : "0 2px 8px rgba(3,105,161,0.2)",
               }}
             >
               {loading ? "検索中…" : "検索"}
@@ -99,11 +228,12 @@ export default function Home() {
         </div>
       </div>
 
-      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "1.5rem 1.5rem" }}>
+      {/* ── コンテンツ ── */}
+      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "2rem 1.5rem" }}>
 
         {/* 検索結果 */}
         {searched && (
-          <section style={{ marginBottom: "2rem" }}>
+          <section style={{ marginBottom: "2.5rem" }}>
             {error && (
               <div style={{
                 padding: "0.75rem 1rem",
@@ -125,56 +255,98 @@ export default function Home() {
             )}
             {results.length > 0 && (
               <>
-                <h2 style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "0.875rem",
-                  color: "var(--color-text-secondary)",
-                  marginBottom: "0.75rem",
-                }}>
-                  「{query}」の検索結果 {results.length} 件
-                </h2>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                  <h2 style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "0.85rem",
+                    color: "var(--color-text-secondary)",
+                    margin: 0,
+                  }}>
+                    「{query}」の検索結果 — {results.filter((r) => !typeFilter || r.law_type === typeFilter).length} 件
+                    {typeFilter ? `（${results.length} 件中）` : ""}
+                  </h2>
+                  {/* 種別フィルタータブ */}
+                  <div role="tablist" aria-label="法令種別フィルター" style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
+                    {([
+                      { key: "", label: "すべて" },
+                      { key: "Act", label: "法律" },
+                      { key: "CabinetOrder", label: "政令" },
+                      { key: "MinisterialOrdinance", label: "省令" },
+                      { key: "Rule", label: "規則" },
+                    ] as { key: TypeFilter; label: string }[]).map(({ key, label }) => {
+                      const count = key ? results.filter((r) => r.law_type === key).length : results.length;
+                      if (count === 0 && key !== "") return null;
+                      return (
+                        <button
+                          key={key}
+                          role="tab"
+                          aria-selected={typeFilter === key}
+                          onClick={() => setTypeFilter(key)}
+                          style={{
+                            padding: "0.2rem 0.65rem",
+                            border: "1px solid var(--color-border)",
+                            borderRadius: "4px",
+                            backgroundColor: typeFilter === key ? "var(--color-accent)" : "var(--color-surface)",
+                            color: typeFilter === key ? "#fff" : "var(--color-text-secondary)",
+                            fontFamily: "var(--font-sans)",
+                            fontSize: "0.75rem",
+                            cursor: "pointer",
+                            fontWeight: typeFilter === key ? 700 : 400,
+                          }}
+                        >
+                          {label} {count}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
                 <div style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
                   gap: "0.5rem",
                 }}>
-                  {results.map((law) => (
-                    <LawCard key={law.law_id} law={law} />
-                  ))}
+                  {results
+                    .filter((r) => !typeFilter || r.law_type === typeFilter)
+                    .map((law) => (
+                      <LawCard key={law.law_id} law={law} />
+                    ))}
                 </div>
               </>
             )}
           </section>
         )}
 
+        {/* 新着情報（ログインユーザーのみ） */}
+        {!searched && loggedIn && <NewsFeedSection />}
+
+        {/* 閲覧履歴 */}
+        {!searched && <RecentHistory />}
+
+        {/* 主要法令 */}
+        {!searched && (
+          <section style={{ marginBottom: "2.5rem" }}>
+            <SectionHeading label="主要法令" />
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))",
+              gap: "0.5rem",
+            }}>
+              {POPULAR_LAWS.map((law) => (
+                <PopularLawCard key={law.lawId} law={law} />
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* 50分野ポータル */}
         <section>
-          <h2 style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "1rem",
-            fontWeight: 700,
-            color: "var(--color-text-primary)",
-            marginBottom: "1.25rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-          }}>
-            <span style={{
-              display: "inline-block",
-              width: "4px",
-              height: "1rem",
-              backgroundColor: "var(--color-accent)",
-              borderRadius: "2px",
-            }} />
-            法令分野から探す
-          </h2>
+          <SectionHeading label="法令分野から探す" />
 
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             {CATEGORY_GROUPS.map((group) => {
               const cats = LAW_CATEGORIES.filter((c) => c.group.id === group.id);
               return (
                 <div key={group.id}>
-                  {/* グループヘッダ */}
                   <div style={{
                     display: "flex",
                     alignItems: "center",
@@ -196,10 +368,9 @@ export default function Home() {
                     </span>
                   </div>
 
-                  {/* カテゴリカード */}
                   <div style={{
-                    display: "flex",
-                    flexWrap: "wrap",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
                     gap: "0.4rem",
                   }}>
                     {cats.map((cat) => (
@@ -207,16 +378,21 @@ export default function Home() {
                         key={cat.slug}
                         href={`/category/${cat.slug}`}
                         style={{
-                          display: "inline-block",
-                          padding: "0.4rem 0.85rem",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          textAlign: "center",
+                          padding: "0.55rem 0.75rem",
                           backgroundColor: "var(--color-surface)",
                           border: `1px solid var(--color-border)`,
-                          borderRadius: "20px",
+                          borderRadius: "6px",
                           textDecoration: "none",
                           fontFamily: "var(--font-sans)",
-                          fontSize: "0.85rem",
+                          fontSize: "0.84rem",
                           color: "var(--color-text-primary)",
                           transition: "all 0.15s",
+                          minHeight: "2.4rem",
+                          lineHeight: 1.35,
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = group.bg;
@@ -239,10 +415,217 @@ export default function Home() {
           </div>
         </section>
       </div>
+
+      {/* ── サイト統計（フッター付近） ── */}
+      <HomepageStats />
     </div>
   );
 }
 
+// ─── セクション見出し ──────────────────────────────────
+function SectionHeading({ label }: { label: string }) {
+  return (
+    <h2 style={{
+      fontFamily: "var(--font-sans)",
+      fontSize: "0.95rem",
+      fontWeight: 700,
+      color: "var(--color-text-primary)",
+      marginBottom: "1rem",
+      display: "flex",
+      alignItems: "center",
+      gap: "0.5rem",
+    }}>
+      <span style={{
+        display: "inline-block",
+        width: "3px",
+        height: "1rem",
+        backgroundColor: "var(--color-accent)",
+        borderRadius: "2px",
+      }} />
+      {label}
+    </h2>
+  );
+}
+
+// ─── 主要法令カード ───────────────────────────────────
+function PopularLawCard({
+  law,
+}: {
+  law: { title: string; num: string; type: string; lawId: string };
+}) {
+  return (
+    <Link
+      href={`/law/${law.lawId}`}
+      style={{
+        display: "block",
+        width: "100%",
+        textAlign: "left",
+        padding: "0.75rem 1rem",
+        backgroundColor: "var(--color-surface)",
+        border: "1px solid var(--color-border)",
+        borderRadius: "6px",
+        textDecoration: "none",
+        transition: "border-color 0.15s",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--color-accent)")}
+      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--color-border)")}
+    >
+      <div style={{ marginBottom: "0.25rem" }}>
+        <span style={{
+          fontFamily: "var(--font-sans)",
+          fontSize: "0.68rem",
+          fontWeight: 700,
+          color: "#0369A1",
+          backgroundColor: "#EFF8FF",
+          border: "1px solid #BAE6FD",
+          borderRadius: "3px",
+          padding: "0.1rem 0.4rem",
+        }}>
+          {law.type}
+        </span>
+      </div>
+      <div style={{
+        fontFamily: "var(--font-sans)",
+        fontSize: "0.92rem",
+        fontWeight: 700,
+        color: "var(--color-text-primary)",
+        marginBottom: "0.15rem",
+      }}>
+        {law.title}
+      </div>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "0.72rem", color: "#4B6A8A" }}>
+        {law.num}
+      </div>
+    </Link>
+  );
+}
+
+// ─── 新着情報 ─────────────────────────────────────────
+function NewsFeedSection() {
+  const [items, setItems] = useState<Array<{ type: string; id: string; title: string; subtitle?: string; date: string; href: string }>>([]);
+  const [followedProjects, setFollowedProjects] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    fetch("/api/news")
+      .then((r) => r.json())
+      .then((data) => setItems(data))
+      .catch(() => {});
+    setFollowedProjects(getFollowedIds("project"));
+  }, []);
+
+  if (items.length === 0) return null;
+
+  const TYPE_LABELS: Record<string, { label: string; bg: string; fg: string }> = {
+    project: { label: "プロジェクト", bg: "#EBF2FD", fg: "#1B4B8A" },
+    patch: { label: "改正案", bg: "#FFFBEB", fg: "#D97706" },
+    commentary: { label: "逐条解説", bg: "#ECFDF5", fg: "#059669" },
+  };
+
+  return (
+    <section style={{ marginBottom: "2rem" }}>
+      <SectionHeading label="新着情報" />
+      <div style={{
+        backgroundColor: "var(--color-surface)",
+        border: "1px solid var(--color-border)",
+        borderRadius: "8px",
+        overflow: "hidden",
+      }}>
+        {items.map((item, i) => {
+          const typeInfo = TYPE_LABELS[item.type] ?? { label: item.type, bg: "#F1F5F9", fg: "#475569" };
+          const isFollowed = (item.type === "project" && followedProjects.has(item.id));
+          return (
+            <Link
+              key={`${item.type}-${item.id}`}
+              href={item.href}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.6rem",
+                padding: "0.55rem 1rem",
+                textDecoration: "none",
+                borderBottom: i < items.length - 1 ? "1px solid var(--color-border)" : "none",
+                fontFamily: "var(--font-sans)",
+                backgroundColor: isFollowed ? "rgba(2,132,199,0.05)" : undefined,
+              }}
+            >
+              <span style={{ fontSize: "0.68rem", color: "var(--color-text-secondary)", whiteSpace: "nowrap", minWidth: "3.2rem" }}>
+                {new Date(item.date).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })}
+              </span>
+              <span style={{
+                fontSize: "0.65rem", fontWeight: 600, padding: "0.1rem 0.4rem", borderRadius: "3px",
+                backgroundColor: typeInfo.bg, color: typeInfo.fg, whiteSpace: "nowrap",
+              }}>
+                {typeInfo.label}
+              </span>
+              <span style={{ fontSize: "0.82rem", color: "var(--color-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {isFollowed && <span style={{ color: "var(--color-accent)", marginRight: "0.25rem" }}>★</span>}
+                {item.title}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+// ─── 閲覧履歴 ─────────────────────────────────────────
+function RecentHistory() {
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+
+  useEffect(() => {
+    setHistory(getRecentLaws());
+  }, []);
+
+  if (history.length === 0) return null;
+
+  return (
+    <section style={{ marginBottom: "2.5rem" }}>
+      <SectionHeading label="最近閲覧した法令" />
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+        gap: "0.5rem",
+      }}>
+        {history.map((entry, idx) => (
+          <Link
+            key={`${entry.law_id}-${idx}`}
+            href={`/law/${encodeURIComponent(entry.law_id)}`}
+            style={{
+              display: "block",
+              padding: "0.65rem 1rem",
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "6px",
+              textDecoration: "none",
+              transition: "border-color 0.15s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--color-accent)")}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--color-border)")}
+          >
+            <div style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: "0.9rem",
+              fontWeight: 700,
+              color: "var(--color-text-primary)",
+              marginBottom: "0.15rem",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}>
+              {entry.law_title}
+            </div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "0.72rem", color: "var(--color-text-secondary)" }}>
+              {entry.law_num}
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── 法令カード（検索結果用）──────────────────────────
 function LawCard({ law }: { law: LawSearchResult }) {
   return (
     <Link
@@ -260,7 +643,7 @@ function LawCard({ law }: { law: LawSearchResult }) {
       onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--color-border)")}
     >
       <div style={{
-        fontFamily: "var(--font-serif)",
+        fontFamily: "var(--font-sans)",
         fontSize: "0.95rem",
         fontWeight: 700,
         color: "var(--color-text-primary)",

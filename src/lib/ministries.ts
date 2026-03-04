@@ -102,8 +102,18 @@ const TITLE_MINISTRY_RULES: [RegExp, MinistryLink][] = [
   [/道路交通/,
     { name: "警察庁（国家公安委員会）", url: "https://www.npa.go.jp/", lawPageUrl: "https://www.npa.go.jp/laws/index.html" }],
 
-  // 法務省 — 民事基本法
-  [/民法|商法|会社法|手形|小切手|破産|民事再生|会社更生|倒産|民事執行|民事保全|保険法$/,
+  // 厚生労働省 — 労働法（法務省の保険法$パターンより先にマッチさせる）
+  [/労働基準|労働安全|労働関係|労働者|労働組合|労働契約|労働審判|雇用|最低賃金|育児.休業|介護.休業|育児・介護|派遣労働/,
+    { name: "厚生労働省", url: "https://www.mhlw.go.jp/", lawPageUrl: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/000003259.html" }],
+  [/健康保険|国民年金|厚生年金|社会保険|介護保険|医療保険/,
+    { name: "厚生労働省", url: "https://www.mhlw.go.jp/", lawPageUrl: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/000003259.html" }],
+  [/生活保護|社会福祉|老人福祉|障害者|児童福祉|母子/,
+    { name: "厚生労働省", url: "https://www.mhlw.go.jp/", lawPageUrl: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/000003259.html" }],
+  [/薬事|薬機|医薬品|医療機器|感染症|食品衛生|健康増進/,
+    { name: "厚生労働省", url: "https://www.mhlw.go.jp/", lawPageUrl: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/000003259.html" }],
+
+  // 法務省 — 民事基本法（保険法は完全一致のみ。〇〇保険法は上の厚労省パターンで先にマッチ）
+  [/民法|商法|会社法|手形|小切手|破産|民事再生|会社更生|倒産|民事執行|民事保全|^保険法$/,
     { name: "法務省", url: "https://www.moj.go.jp/", lawPageUrl: "https://www.moj.go.jp/housei/houan/houan.html" }],
   [/民事訴訟|人事訴訟|非訟事件|家事事件|借地借家|供託|利息制限|法の適用に関する通則/,
     { name: "法務省", url: "https://www.moj.go.jp/", lawPageUrl: "https://www.moj.go.jp/housei/houan/houan.html" }],
@@ -119,16 +129,6 @@ const TITLE_MINISTRY_RULES: [RegExp, MinistryLink][] = [
   // 法務省 — 入管
   [/出入国|外国人|難民/,
     { name: "法務省（出入国在留管理庁）", url: "https://www.moj.go.jp/isa/", lawPageUrl: "https://www.moj.go.jp/isa/laws/index.html" }],
-
-  // 厚生労働省 — 労働法
-  [/労働基準|労働安全|労働関係|労働者|労働組合|労働契約|労働審判|雇用|最低賃金|育児.休業|介護.休業|育児・介護|派遣労働/,
-    { name: "厚生労働省", url: "https://www.mhlw.go.jp/", lawPageUrl: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/000003259.html" }],
-  [/健康保険|国民年金|厚生年金|社会保険|介護保険|医療保険/,
-    { name: "厚生労働省", url: "https://www.mhlw.go.jp/", lawPageUrl: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/000003259.html" }],
-  [/生活保護|社会福祉|老人福祉|障害者|児童福祉|母子/,
-    { name: "厚生労働省", url: "https://www.mhlw.go.jp/", lawPageUrl: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/000003259.html" }],
-  [/薬事|薬機|医薬品|医療機器|感染症|食品衛生|健康増進/,
-    { name: "厚生労働省", url: "https://www.mhlw.go.jp/", lawPageUrl: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/000003259.html" }],
 
   // 知的財産（特許庁）
   [/不正競争|工業所有権|特許|実用新案|意匠|商標/,
@@ -177,7 +177,7 @@ const TITLE_MINISTRY_RULES: [RegExp, MinistryLink][] = [
   // 総務省
   [/電気通信|放送|電波|無線|インターネット|郵便/,
     { name: "総務省", url: "https://www.soumu.go.jp/", lawPageUrl: "https://www.soumu.go.jp/main_sosiki/joho_tsusin/d_syohi/houki.html" }],
-  [/地方自治|地方公務員|国家公務員|行政手続|行政不服|行政代執行|国家行政組織|個人情報|番号法|マイナ|公職選挙|地方税|地方財政|情報公開/,
+  [/地方自治|地方公務員|国家公務員|行政手続|行政不服|行政代執行|国家行政組織|個人情報|番号法|マイナ|公職選挙|地方税|地方財政|情報.*公開/,
     { name: "総務省", url: "https://www.soumu.go.jp/", lawPageUrl: "https://www.soumu.go.jp/main_sosiki/joho_tsusin/d_syohi/houki.html" }],
 
   // 文部科学省

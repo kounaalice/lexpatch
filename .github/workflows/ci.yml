@@ -30,16 +30,13 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
-      - name: Lint (errors block, warnings tracked)
-        run: npx eslint src/ --max-warnings=999
+      - name: Lint (zero warnings policy)
+        run: npx eslint src/ --max-warnings=0
 
       - name: Format check
         run: npx prettier --check "src/**/*.{ts,tsx}"
 
-      - name: Test
-        run: npx vitest run
-
-      - name: Test coverage (lines≥60%, branches≥50%)
+      - name: Test + coverage (lines≥60%, branches≥50%)
         run: npx vitest run --coverage
 
   security:

@@ -20,7 +20,7 @@
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
       "prettier --write",
-      "eslint --fix --max-warnings=999"
+      "eslint --fix --max-warnings=0"
     ]
   },
   "dependencies": {

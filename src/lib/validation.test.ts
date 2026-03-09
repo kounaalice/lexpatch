@@ -6,6 +6,7 @@ import {
   errorReportSchema,
   createPatchSchema,
   commentarySchema,
+  validateRequest,
 } from "./validation";
 
 describe("contactSchema", () => {
@@ -173,5 +174,100 @@ describe("commentarySchema", () => {
       content: "あ".repeat(10001),
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("validateRequest", () => {
+  /** Helper to create a Request with JSON body */
+  function jsonRequest(body: unknown): Request {
+    return new Request("https://lexcard.jp/api/test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  }
+
+  it("有効なボディでsuccess: trueとパース済みdataを返す", async () => {
+    const req = jsonRequest({
+      name: "テスト",
+      email: "test@example.com",
+      subject: "件名",
+      message: "本文",
+    });
+    const result = await validateRequest(req, contactSchema);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.name).toBe("テスト");
+      expect(result.data.email).toBe("test@example.com");
+      expect(result.data.subject).toBe("件名");
+      expect(result.data.message).toBe("本文");
+    }
+  });
+
+  it("バリデーション失敗時にsuccess: falseと400 Responseを返す", async () => {
+    const req = jsonRequest({
+      name: "テスト",
+      email: "not-valid-email",
+      subject: "件名",
+      message: "本文",
+    });
+    const result = await validateRequest(req, contactSchema);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBeInstanceOf(Response);
+      expect(result.error.status).toBe(400);
+      const body = await result.error.json();
+      expect(body.error).toBe("Validation failed");
+      expect(body.details).toBeInstanceOf(Array);
+      expect(body.details.length).toBeGreaterThan(0);
+      // Each detail should have path and message
+      expect(body.details[0]).toHaveProperty("path");
+      expect(body.details[0]).toHaveProperty("message");
+    }
+  });
+
+  it("不正なJSONでsuccess: falseと400 'Invalid JSON'を返す", async () => {
+    const req = new Request("https://lexcard.jp/api/test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "this is not json{{{",
+    });
+    const result = await validateRequest(req, contactSchema);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBeInstanceOf(Response);
+      expect(result.error.status).toBe(400);
+      const body = await result.error.json();
+      expect(body.error).toBe("Invalid JSON");
+    }
+  });
+
+  it("複数フィールドのバリデーションエラーでdetailsに全エラーを含む", async () => {
+    const req = jsonRequest({
+      // name missing, email invalid, subject missing, message missing
+    });
+    const result = await validateRequest(req, contactSchema);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const body = await result.error.json();
+      expect(body.details.length).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it("detailsのpathがドット区切り形式である", async () => {
+    // Use createPatchSchema with invalid nested data
+    const req = jsonRequest({
+      lawId: "321",
+      targetArticle: "第一条",
+      lines: [{ op: "invalid", num: "1", text: "テスト" }],
+    });
+    const result = await validateRequest(req, createPatchSchema);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const body = await result.error.json();
+      // The path for nested array element errors should use dot notation
+      const paths = body.details.map((d: { path: string }) => d.path);
+      expect(paths.some((p: string) => p.includes("lines"))).toBe(true);
+    }
   });
 });

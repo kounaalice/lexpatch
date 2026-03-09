@@ -1,0 +1,201 @@
+/* ── 追加テーマ (Tailwind v4 のCSS処理をバイパスするため別ファイル) ── */
+
+/* ── ゴシックテーマ (黒薔薇の大聖堂) ── */
+[data-theme="gothic"] {
+  --color-bg:        #1A0A0A;
+  --color-surface:   #2A1515;
+  --color-border:    #4A2020;
+  --color-text-primary:   #E8D5C4;
+  --color-text-secondary: #A08070;
+  --color-accent:    #C9A84C;
+  --color-add-fg:    #C9A84C;
+  --color-add-bg:    #2A2010;
+  --color-del-fg:    #F87171;
+  --color-del-bg:    #3A0A0A;
+  --color-move-fg:   #A78BFA;
+  --color-move-bg:   #2A1530;
+  --color-warn-fg:   #FBBF24;
+  --color-warn-bg:   #2A1A05;
+  --color-header-bg:     #0D0505;
+  --color-header-text:   #C9A84C;
+  --color-header-link:   #E8D5C4;
+  --color-header-accent: #8B0000;
+  --color-header-border: #4A2020;
+  --color-footer-bg:     #0D0505;
+  --color-footer-text:   #C9A84C;
+  --color-footer-link:   #E8D5C4;
+  --color-footer-accent: #8B0000;
+  --color-footer-border: #4A2020;
+  --color-footer-muted:  #A08070;
+  --font-sans: "Cinzel", "游明朝", "YuMincho", "Hiragino Mincho ProN", serif;
+  --font-serif: "Cinzel", "游明朝", "YuMincho", "Hiragino Mincho ProN", serif;
+}
+
+/* ── クラシックテーマ (ヴィクトリアンの書庫) ── */
+[data-theme="classic"] {
+  --color-bg:        #FDF8F0;
+  --color-surface:   #FFFEF8;
+  --color-border:    #D4C5A0;
+  --color-text-primary:   #3A2A15;
+  --color-text-secondary: #5C4033;
+  --color-accent:    #B8860B;
+  --color-add-fg:    #2E6B35;
+  --color-add-bg:    #F0F8E8;
+  --color-del-fg:    #8B2020;
+  --color-del-bg:    #FDF0EE;
+  --color-move-fg:   #6B4FA0;
+  --color-move-bg:   #F5F0FF;
+  --color-warn-fg:   #A07000;
+  --color-warn-bg:   #FFF8E8;
+  --color-header-bg:     #F5EDD8;
+  --color-header-text:   #3A2A15;
+  --color-header-link:   #5C4033;
+  --color-header-accent: #B8860B;
+  --color-header-border: #D4C5A0;
+  --color-footer-bg:     #F5EDD8;
+  --color-footer-text:   #3A2A15;
+  --color-footer-link:   #5C4033;
+  --color-footer-accent: #B8860B;
+  --color-footer-border: #D4C5A0;
+  --color-footer-muted:  #8A7A60;
+  --font-sans: "EB Garamond", "游明朝", "YuMincho", "Hiragino Mincho ProN", serif;
+  --font-serif: "EB Garamond", "游明朝", "YuMincho", "Hiragino Mincho ProN", serif;
+}
+
+/* ── ゆめかわテーマ (お菓子の魔法城) ── */
+[data-theme="yumekawa"] {
+  --color-bg:        #FFF0F5;
+  --color-surface:   #FFFFFF;
+  --color-border:    #F0C0E0;
+  --color-text-primary:   #5A2050;
+  --color-text-secondary: #9060A0;
+  --color-accent:    #D946A8;
+  --color-add-fg:    #10B981;
+  --color-add-bg:    #F0FFF5;
+  --color-del-fg:    #F472B6;
+  --color-del-bg:    #FFF0F8;
+  --color-move-fg:   #A78BFA;
+  --color-move-bg:   #F5F0FF;
+  --color-warn-fg:   #F59E0B;
+  --color-warn-bg:   #FFFBEB;
+  --color-header-bg:     #FFF5FA;
+  --color-header-text:   #D946A8;
+  --color-header-link:   #9060A0;
+  --color-header-accent: #D946A8;
+  --color-header-border: #F0C0E0;
+  --color-footer-bg:     #FFF5FA;
+  --color-footer-text:   #D946A8;
+  --color-footer-link:   #9060A0;
+  --color-footer-accent: #D946A8;
+  --color-footer-border: #F0C0E0;
+  --color-footer-muted:  #C090B0;
+  --font-sans: "M PLUS Rounded 1c", "BIZ UDPGothic", sans-serif;
+  --font-serif: "M PLUS Rounded 1c", "BIZ UDPGothic", sans-serif;
+}
+
+/* ── みずいろテーマ (氷の魔法宮殿) ── */
+[data-theme="mizuiro"] {
+  --color-bg:        #EFF8FF;
+  --color-surface:   rgba(255,255,255,0.7);
+  --color-border:    rgba(186,230,253,0.6);
+  --color-text-primary:   #1E3A5F;
+  --color-text-secondary: #4B6A8A;
+  --color-accent:    #0EA5E9;
+  --color-add-fg:    #047857;
+  --color-add-bg:    #ECFDF5;
+  --color-del-fg:    #B91C1C;
+  --color-del-bg:    #FEF2F2;
+  --color-move-fg:   #7C3AED;
+  --color-move-bg:   #F5F3FF;
+  --color-warn-fg:   #D97706;
+  --color-warn-bg:   #FFFBEB;
+  --color-header-bg:     rgba(255,255,255,0.6);
+  --color-header-text:   #1E3A5F;
+  --color-header-link:   #4B6A8A;
+  --color-header-accent: #0EA5E9;
+  --color-header-border: rgba(186,230,253,0.5);
+  --color-footer-bg:     rgba(240,249,255,0.8);
+  --color-footer-text:   #1E3A5F;
+  --color-footer-link:   #4B6A8A;
+  --color-footer-accent: #0EA5E9;
+  --color-footer-border: rgba(186,230,253,0.5);
+  --color-footer-muted:  #6B8DAF;
+  --font-sans: "BIZ UDPGothic", sans-serif;
+  --font-serif: "BIZ UDPGothic", sans-serif;
+}
+
+/* ── テーマ固有の構造的スタイル ── */
+[data-theme="gothic"] .card-hover { border-style: double; border-width: 3px; }
+[data-theme="gothic"] :focus-visible { outline-color: #C9A84C; }
+[data-theme="classic"] .card-hover { box-shadow: 2px 3px 8px rgba(92,64,51,0.08); }
+[data-theme="yumekawa"] .card-hover { border-radius: 20px; }
+[data-theme="yumekawa"] input,
+[data-theme="yumekawa"] textarea,
+[data-theme="yumekawa"] select,
+[data-theme="yumekawa"] button { border-radius: 16px; }
+[data-theme="mizuiro"] .card-hover {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── ゲーミングモード ── */
+@keyframes gaming-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes gaming-float {
+  0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.15; }
+  50% { transform: translateY(-10vh) rotate(180deg); }
+  90% { opacity: 0.15; }
+}
+[data-gaming="true"] .card-hover {
+  position: relative;
+  overflow: hidden;
+}
+[data-gaming="true"] .card-hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.12) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: gaming-shimmer 3s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ── カードゲーム アニメーション ── */
+@keyframes card-glow-sr {
+  0%, 100% { box-shadow: 0 0 8px rgba(167,139,250,0.3); }
+  50% { box-shadow: 0 0 18px rgba(167,139,250,0.6); }
+}
+@keyframes card-glow-ssr {
+  0%, 100% { box-shadow: 0 0 10px rgba(245,158,11,0.3); }
+  50% { box-shadow: 0 0 25px rgba(245,158,11,0.7); }
+}
+@keyframes card-flip {
+  0% { transform: perspective(600px) rotateY(90deg) scale(0.8); opacity: 0; }
+  60% { transform: perspective(600px) rotateY(-10deg) scale(1.05); opacity: 1; }
+  100% { transform: perspective(600px) rotateY(0deg) scale(1); }
+}
+@keyframes card-reveal {
+  0% { transform: scale(0.5) translateY(30px); opacity: 0; }
+  50% { transform: scale(1.08) translateY(-5px); }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes card-shine {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.gaming-card-shimmer {
+  background: linear-gradient(
+    120deg,
+    transparent 25%,
+    rgba(245,158,11,0.15) 37%,
+    rgba(167,139,250,0.12) 50%,
+    rgba(244,114,182,0.10) 63%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  animation: card-shine 2.5s ease-in-out infinite;
+}

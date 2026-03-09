@@ -1,8 +1,9 @@
-import type { PatchData, PatchLine } from "./types";
+import type { PatchData } from "./types";
 
 export interface CanonLine {
   num: string | null;
   text: string;
+  indent?: number; // 0=paragraph(default), 1=item(号), 2=subitem(号細分), 3=sub-subitem
 }
 
 /**
@@ -16,10 +17,7 @@ export interface CanonLine {
  * 項番号の自動振り直しはしない（パッチに書かれた番号をそのまま使う）。
  * Lintで番号整合性を別途チェックする。
  */
-export function applyPatch(
-  canonLines: CanonLine[],
-  patch: PatchData
-): CanonLine[] {
+export function applyPatch(canonLines: CanonLine[], patch: PatchData): CanonLine[] {
   // Canonを num → index で引けるようにする
   const canonByNum = new Map<string, number>();
   canonLines.forEach((cl, i) => {
@@ -75,19 +73,61 @@ export function applyPatch(
 
 // 全角数字を半角に変換してソート可能な文字列にする
 function toHalfWidth(s: string): string {
-  return s.replace(/[０-９]/g, (c) =>
-    String.fromCharCode(c.charCodeAt(0) - 0xfee0)
-  );
+  return s.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
 }
 
 /**
  * Article の paragraphs を CanonLine 配列に変換するユーティリティ
+ * 号(Item) / 号細分(Subitem) を indent 付きでフラット化
  */
 export function paragraphsToCanonLines(
-  paragraphs: Array<{ num: string; sentences: string[] }>
+  paragraphs: Array<{
+    num: string;
+    sentences: string[];
+    items?: Array<{
+      title: string;
+      sentences: string[];
+      subitems?: Array<{
+        title: string;
+        sentences: string[];
+        subitems?: Array<{ title: string; sentences: string[] }>;
+      }>;
+    }>;
+  }>,
 ): CanonLine[] {
-  return paragraphs.map((p) => ({
-    num: p.num || null,
-    text: p.sentences.join(""),
-  }));
+  const result: CanonLine[] = [];
+  for (const p of paragraphs) {
+    // 項本文
+    result.push({ num: p.num || null, text: p.sentences.join("") });
+    // 号
+    if (p.items) {
+      for (const item of p.items) {
+        result.push({
+          num: null,
+          text: `${item.title}\u3000${item.sentences.join("")}`,
+          indent: 1,
+        });
+        // 号細分
+        if (item.subitems) {
+          for (const sub of item.subitems) {
+            result.push({
+              num: null,
+              text: `${sub.title}\u3000${sub.sentences.join("")}`,
+              indent: 2,
+            });
+            if (sub.subitems) {
+              for (const sub2 of sub.subitems) {
+                result.push({
+                  num: null,
+                  text: `${sub2.title}\u3000${sub2.sentences.join("")}`,
+                  indent: 3,
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return result;
 }

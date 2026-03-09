@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<defs>
+  <linearGradient id="bg" x1="0.1" y1="0" x2="0.8" y2="1">
+    <stop offset="0%" stop-color="#D6EFFC"/>
+    <stop offset="30%" stop-color="#B8E4FA"/>
+    <stop offset="65%" stop-color="#A5D8F8"/>
+    <stop offset="100%" stop-color="#56B8F0"/>
+  </linearGradient>
+  <linearGradient id="sofa" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0%" stop-color="#3BA3E0"/>
+    <stop offset="100%" stop-color="#1D7AB8"/>
+  </linearGradient>
+  <clipPath id="clip"><rect width="512" height="512" rx="100"/></clipPath>
+</defs>
+<g clip-path="url(#clip)">
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <ellipse cx="140" cy="100" rx="220" ry="160" fill="rgba(255,255,255,0.28)"/>
+  <ellipse cx="380" cy="460" rx="180" ry="100" fill="rgba(255,255,255,0.1)"/>
+  <path d="M110 80 C90 80 74 96 74 116 L74 428 C74 448 90 462 110 462 L416 462 C436 462 448 448 448 428 L448 408 C448 394 436 384 416 384 L170 384 C156 384 146 374 146 360 L146 116 C146 96 130 80 110 80Z" fill="url(#sofa)" opacity="0.88"/>
+  <path d="M110 88 C96 88 84 100 84 116 L84 420 C84 436 96 448 110 448 L170 448" fill="none" stroke="rgba(255,255,255,0.32)" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M146 400 Q260 378 416 400" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3" stroke-linecap="round"/>
+  <rect x="164" y="120" width="80" height="264" rx="12" fill="white" opacity="0.9" transform="rotate(-4,204,252)"/>
+  <rect x="238" y="138" width="72" height="246" rx="12" fill="white" opacity="0.74" transform="rotate(2,274,261)"/>
+  <rect x="304" y="152" width="66" height="232" rx="12" fill="white" opacity="0.56" transform="rotate(5,337,268)"/>
+  <line x1="182" y1="180" x2="228" y2="178" stroke="#BAE6FD" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+  <line x1="184" y1="200" x2="224" y2="198" stroke="#BAE6FD" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+  <line x1="186" y1="220" x2="218" y2="218" stroke="#BAE6FD" stroke-width="2.5" stroke-linecap="round" opacity="0.3"/>
+  <line x1="256" y1="196" x2="294" y2="197" stroke="#BAE6FD" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+  <line x1="258" y1="216" x2="290" y2="217" stroke="#BAE6FD" stroke-width="2.5" stroke-linecap="round" opacity="0.3"/>
+  <path d="M420 52 L428 76 L452 84 L428 92 L420 116 L412 92 L388 84 L412 76Z" fill="white" opacity="0.95"/>
+  <path d="M365 28 L370 46 L388 51 L370 56 L365 74 L360 56 L342 51 L360 46Z" fill="white" opacity="0.65"/>
+  <path d="M462 135 L467 150 L482 155 L467 160 L462 175 L457 160 L442 155 L457 150Z" fill="white" opacity="0.55"/>
+  <path d="M306 38 L309 49 L320 52 L309 55 L306 66 L303 55 L292 52 L303 49Z" fill="white" opacity="0.45"/>
+  <path d="M438 245 L441 254 L450 257 L441 260 L438 269 L435 260 L426 257 L435 254Z" fill="white" opacity="0.4"/>
+  <path d="M116 40 L118 47 L125 49 L118 51 L116 58 L114 51 L107 49 L114 47Z" fill="white" opacity="0.3"/>
+  <path d="M474 340 L476 346 L482 348 L476 350 L474 356 L472 350 L466 348 L472 346Z" fill="white" opacity="0.28"/>
+  <path d="M250 22 L252 28 L258 30 L252 32 L250 38 L248 32 L242 30 L248 28Z" fill="white" opacity="0.25"/>
+  <text x="448" y="105" fill="white" font-size="28" opacity="0.65">❄</text>
+  <text x="480" y="195" fill="white" font-size="20" opacity="0.42">❄</text>
+  <text x="338" y="52" fill="white" font-size="17" opacity="0.38">❄</text>
+  <text x="415" y="310" fill="white" font-size="15" opacity="0.25">❄</text>
+  <text x="88" y="65" fill="white" font-size="13" opacity="0.22">❄</text>
+  <text x="486" y="420" fill="white" font-size="12" opacity="0.2">❄</text>
+  <text x="462" y="65" fill="white" font-size="24" opacity="0.6">♪</text>
+  <text x="398" y="190" fill="white" font-size="18" opacity="0.38">♫</text>
+  <text x="478" y="265" fill="white" font-size="16" opacity="0.32">♪</text>
+  <text x="140" y="58" fill="white" font-size="14" opacity="0.22">♪</text>
+  <text x="450" y="450" fill="white" font-size="13" opacity="0.2">♫</text>
+  <text x="490" y="58" fill="white" font-size="16" opacity="0.45">♡</text>
+  <text x="285" y="32" fill="white" font-size="13" opacity="0.3">♡</text>
+  <text x="475" y="380" fill="white" font-size="12" opacity="0.22">♡</text>
+  <text x="415" y="460" fill="white" font-size="11" opacity="0.18">♡</text>
+  <circle cx="395" cy="40" r="3" fill="white" opacity="0.5"/>
+  <circle cx="480" cy="80" r="2.5" fill="white" opacity="0.45"/>
+  <circle cx="442" cy="178" r="2" fill="white" opacity="0.35"/>
+  <circle cx="350" cy="72" r="2" fill="white" opacity="0.3"/>
+  <circle cx="460" cy="300" r="2.5" fill="white" opacity="0.25"/>
+  <circle cx="500" cy="150" r="2" fill="white" opacity="0.3"/>
+  <circle cx="200" cy="40" r="2" fill="white" opacity="0.2"/>
+  <circle cx="490" cy="440" r="2" fill="white" opacity="0.2"/>
+</g>
+</svg>

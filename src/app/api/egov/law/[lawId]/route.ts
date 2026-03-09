@@ -3,7 +3,7 @@ import { getLawData } from "@/lib/egov/client";
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ lawId: string }> }
+  { params }: { params: Promise<{ lawId: string }> },
 ) {
   const { lawId } = await params;
   try {

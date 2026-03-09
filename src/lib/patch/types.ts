@@ -5,11 +5,11 @@ export type PatchType = "A" | "C";
 
 export interface PatchLine {
   op: PatchOp;
-  num: string | null;    // 項番号 "１", "２" など。null = 本文行
-  text: string;          // 記号を除いたテキスト
-  scope?: boolean;       // C記法: 条番号ヘッダ行か
-  movedFrom?: string;    // 繰下げ元の項番号（Lint推定 or ユーザ注記）
-  rawLine: string;       // 元の行テキスト（デバッグ・表示用）
+  num: string | null; // 項番号 "１", "２" など。null = 本文行
+  text: string; // 記号を除いたテキスト
+  scope?: boolean; // C記法: 条番号ヘッダ行か
+  movedFrom?: string; // 繰下げ元の項番号（Lint推定 or ユーザ注記）
+  rawLine: string; // 元の行テキスト（デバッグ・表示用）
 }
 
 export interface PatchData {
@@ -39,6 +39,6 @@ export interface SideBySideDiffResult {
 
 export interface SideBySideRow {
   op: DiffOp | "moved";
-  left: { num: string | null; text: string } | null;   // OLD (Canon)
-  right: { num: string | null; text: string } | null;  // NEW (溶け込み後)
+  left: { num: string | null; text: string } | null; // OLD (Canon)
+  right: { num: string | null; text: string } | null; // NEW (溶け込み後)
 }

@@ -1,6 +1,4 @@
-import type {
-  CanonLine,
-} from "./apply";
+import type { CanonLine } from "./apply";
 import type {
   UnifiedDiffResult,
   SideBySideDiffResult,
@@ -24,11 +22,13 @@ function lcs<T>(a: T[], b: T[], eq: (x: T, y: T) => boolean): Array<[number, num
   }
   // バックトラック
   const pairs: Array<[number, number]> = [];
-  let i = m, j = n;
+  let i = m,
+    j = n;
   while (i > 0 && j > 0) {
     if (eq(a[i - 1], b[j - 1])) {
       pairs.push([i - 1, j - 1]);
-      i--; j--;
+      i--;
+      j--;
     } else if (dp[i - 1][j] >= dp[i][j - 1]) {
       i--;
     } else {
@@ -38,13 +38,19 @@ function lcs<T>(a: T[], b: T[], eq: (x: T, y: T) => boolean): Array<[number, num
   return pairs.reverse();
 }
 
+/**
+ * 行の一致判定: text のみで比較（num は無視）
+ * 項の追加・削除で番号がずれても、テキストが同じなら一致とみなす。
+ * これにより「一部文言を編集すると全削除全追加になる」問題を防止。
+ */
 function lineEq(a: CanonLine, b: CanonLine): boolean {
-  return a.num === b.num && a.text === b.text;
+  return a.text === b.text;
 }
 
 interface RawDiff {
   op: DiffOp;
   line: CanonLine;
+  rightLine?: CanonLine; // eq 行で右側の num が異なる場合
 }
 
 function computeRawDiff(canon: CanonLine[], next: CanonLine[]): RawDiff[] {
@@ -65,8 +71,15 @@ function computeRawDiff(canon: CanonLine[], next: CanonLine[]): RawDiff[] {
     while (ni < na) {
       result.push({ op: "add", line: next[ni++] });
     }
-    // 共通行
-    result.push({ op: "eq", line: canon[ci++] });
+    // 共通行（num が変わった場合は rightLine に記録）
+    const cLine = canon[ci];
+    const nLine = next[ni];
+    result.push({
+      op: "eq",
+      line: cLine,
+      rightLine: cLine.num !== nLine.num ? nLine : undefined,
+    });
+    ci++;
     ni++;
     li++;
   }
@@ -78,12 +91,11 @@ function computeRawDiff(canon: CanonLine[], next: CanonLine[]): RawDiff[] {
 }
 
 // Unified diff
-export function unifiedDiff(
-  canon: CanonLine[],
-  next: CanonLine[]
-): UnifiedDiffResult {
+export function unifiedDiff(canon: CanonLine[], next: CanonLine[]): UnifiedDiffResult {
   const raw = computeRawDiff(canon, next);
-  let added = 0, deleted = 0, unchanged = 0;
+  let added = 0,
+    deleted = 0,
+    unchanged = 0;
 
   const lines: DiffLine[] = raw.map(({ op, line }) => {
     if (op === "add") added++;
@@ -96,13 +108,12 @@ export function unifiedDiff(
 }
 
 // Side-by-side diff
-export function sideBySideDiff(
-  canon: CanonLine[],
-  next: CanonLine[]
-): SideBySideDiffResult {
+export function sideBySideDiff(canon: CanonLine[], next: CanonLine[]): SideBySideDiffResult {
   const raw = computeRawDiff(canon, next);
   const rows: SideBySideRow[] = [];
-  let added = 0, deleted = 0, unchanged = 0;
+  let added = 0,
+    deleted = 0,
+    unchanged = 0;
 
   // del と add をペアにする（置換扱い）
   let i = 0;
@@ -117,7 +128,8 @@ export function sideBySideDiff(
           left: { num: cur.line.num, text: cur.line.text },
           right: { num: next_.line.num, text: next_.line.text },
         });
-        deleted++; added++;
+        deleted++;
+        added++;
         i += 2;
         continue;
       }
@@ -127,10 +139,11 @@ export function sideBySideDiff(
       rows.push({ op: "add", left: null, right: { num: cur.line.num, text: cur.line.text } });
       added++;
     } else {
+      const rightNum = cur.rightLine ? cur.rightLine.num : cur.line.num;
       rows.push({
         op: "eq",
         left: { num: cur.line.num, text: cur.line.text },
-        right: { num: cur.line.num, text: cur.line.text },
+        right: { num: rightNum, text: cur.line.text },
       });
       unchanged++;
     }

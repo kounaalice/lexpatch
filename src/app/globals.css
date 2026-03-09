@@ -1,44 +1,119 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap");
+/* Google Fonts は layout.tsx の <link> で読み込み（@import はレンダーブロッキングのため廃止） */
 @import "tailwindcss";
 
-/* ── LexPatch デザイントークン ── */
+/* ── LexCard デザイントークン (アクアライト) ── */
 :root {
   /* 背景・サーフェス */
-  --color-bg:        #F5F3ED;
+  --color-bg:        #EFF8FF;
   --color-surface:   #FFFFFF;
-  --color-border:    #D1CBBC;
+  --color-border:    #BAE6FD;
 
   /* テキスト */
-  --color-text-primary:   #1A1815;
-  --color-text-secondary: #5A5347;
+  --color-text-primary:   #1E3A5F;
+  --color-text-secondary: #4B6A8A;
 
   /* アクセント */
-  --color-accent:    #2D4A22;
+  --color-accent:    #0369A1;
 
-  /* diff: 追加 */
-  --color-add-fg:    #1B6B35;
-  --color-add-bg:    #EBF5EE;
+  /* diff: 追加 (AA 5.15:1 on white) */
+  --color-add-fg:    #047857;
+  --color-add-bg:    #ECFDF5;
 
-  /* diff: 削除 */
-  --color-del-fg:    #9B2C2C;
-  --color-del-bg:    #FDF0EF;
+  /* diff: 削除 (AA 5.74:1 on white) */
+  --color-del-fg:    #B91C1C;
+  --color-del-bg:    #FEF2F2;
 
   /* diff: 繰下げ */
-  --color-move-fg:   #5B3F8F;
-  --color-move-bg:   #F3EEFC;
+  --color-move-fg:   #7C3AED;
+  --color-move-bg:   #F5F3FF;
 
   /* 警告 */
-  --color-warn-fg:   #A85D00;
-  --color-warn-bg:   #FFF8EB;
+  --color-warn-fg:   #D97706;
+  --color-warn-bg:   #FFFBEB;
 
-  /* ヘッダ */
-  --color-header-bg: #1A2416;
-  --color-gold:      #8B7355;
+  /* ヘッダ (ライトモード: アクアホワイト) */
+  --color-header-bg:     #FFFFFF;
+  --color-header-text:   #1E3A5F;
+  --color-header-link:   #4B6A8A;
+  --color-header-accent: #0369A1;
+  --color-header-border: #BAE6FD;
+
+  /* フッタ (ライトモード) */
+  --color-footer-bg:     #F0F9FF;
+  --color-footer-text:   #1E3A5F;
+  --color-footer-link:   #4B6A8A;
+  --color-footer-accent: #0369A1;
+  --color-footer-border: #BAE6FD;
+  --color-footer-muted:  #6B8DAF;
 
   /* フォント */
-  --font-sans:  "Noto Sans JP", sans-serif;
-  --font-serif: "Noto Serif JP", serif;
+  --font-sans:  "BIZ UDPGothic", sans-serif;
+  --font-serif: "BIZ UDPGothic", sans-serif;
   --font-mono:  "JetBrains Mono", monospace;
+}
+
+/* ── ダークテーマ ── */
+[data-theme="dark"] {
+  --color-bg:        #0F172A;
+  --color-surface:   #1E293B;
+  --color-border:    #334155;
+  --color-text-primary:   #E2E8F0;
+  --color-text-secondary: #94A3B8;
+  --color-accent:    #38BDF8;
+  --color-add-fg:    #34D399;
+  --color-add-bg:    #064E3B;
+  --color-del-fg:    #F87171;
+  --color-del-bg:    #450A0A;
+  --color-move-fg:   #A78BFA;
+  --color-move-bg:   #2E1065;
+  --color-warn-fg:   #FBBF24;
+  --color-warn-bg:   #451A03;
+
+  /* ヘッダ (ダークモード: ネイビー維持) */
+  --color-header-bg:     #020617;
+  --color-header-text:   #38BDF8;
+  --color-header-link:   rgba(186,230,253,0.8);
+  --color-header-accent: #38BDF8;
+  --color-header-border: rgba(56,189,248,0.15);
+
+  /* フッタ (ダークモード) */
+  --color-footer-bg:     #0C2340;
+  --color-footer-text:   #38BDF8;
+  --color-footer-link:   rgba(186,230,253,0.7);
+  --color-footer-accent: #38BDF8;
+  --color-footer-border: rgba(56,189,248,0.15);
+  --color-footer-muted:  rgba(186,230,253,0.5);
+}
+
+/* ── システムダークモード自動検出 ── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]):not([data-theme="gothic"]):not([data-theme="classic"]):not([data-theme="yumekawa"]):not([data-theme="mizuiro"]) {
+    --color-bg:        #0F172A;
+    --color-surface:   #1E293B;
+    --color-border:    #334155;
+    --color-text-primary:   #E2E8F0;
+    --color-text-secondary: #94A3B8;
+    --color-accent:    #38BDF8;
+    --color-add-fg:    #34D399;
+    --color-add-bg:    #064E3B;
+    --color-del-fg:    #F87171;
+    --color-del-bg:    #450A0A;
+    --color-move-fg:   #A78BFA;
+    --color-move-bg:   #2E1065;
+    --color-warn-fg:   #FBBF24;
+    --color-warn-bg:   #451A03;
+    --color-header-bg:     #020617;
+    --color-header-text:   #38BDF8;
+    --color-header-link:   rgba(186,230,253,0.8);
+    --color-header-accent: #38BDF8;
+    --color-header-border: rgba(56,189,248,0.15);
+    --color-footer-bg:     #0C2340;
+    --color-footer-text:   #38BDF8;
+    --color-footer-link:   rgba(186,230,253,0.7);
+    --color-footer-accent: #38BDF8;
+    --color-footer-border: rgba(56,189,248,0.15);
+    --color-footer-muted:  rgba(186,230,253,0.5);
+  }
 }
 
 @theme inline {
@@ -52,4 +127,206 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
+}
+
+/* ── フォーカス可視スタイル (WCAG 2.4.7 / 2.4.11) ── */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+[data-theme="dark"] :focus-visible {
+  outline-color: #38BDF8;
+}
+
+/* ── スキップリンク (WCAG 2.4.1) ── */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 9999;
+}
+.skip-link:focus {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: auto;
+  height: auto;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--color-accent);
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 6px;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ── スクリーンリーダー専用 ── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── iOS自動ズーム防止 (font-size < 16pxでズーム発生) ── */
+input, textarea, select {
+  font-size: 16px;
+}
+
+/* ── カードホバー (hover + focus-within) ── */
+.card-hover {
+  transition: border-color 0.15s;
+}
+.card-hover:hover,
+.card-hover:focus-within {
+  border-color: var(--color-accent) !important;
+}
+
+/* ── プロジェクトタスク レスポンシブ ── */
+.task-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.task-add-detail {
+  display: flex;
+  gap: 0.35rem;
+}
+@media (max-width: 600px) {
+  .task-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+  .task-meta select,
+  .task-meta input[type="date"],
+  .task-meta input[type="time"] {
+    width: 100%;
+    min-width: 0;
+  }
+  .task-add-detail {
+    flex-direction: column;
+  }
+  .task-add-detail select,
+  .task-add-detail input {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+/* ── カテゴリチップ (ドロップダウン内) ── */
+.category-chip {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid var(--color-header-border);
+  border-radius: 14px;
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  color: var(--color-header-link);
+  background-color: transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.category-chip:hover,
+.category-chip:focus-visible {
+  background-color: var(--color-header-border);
+  border-color: var(--color-header-accent);
+  color: var(--color-header-accent);
+}
+[data-theme="dark"] .category-chip {
+  color: rgba(186,230,253,0.85);
+  background-color: rgba(255,255,255,0.05);
+  border-color: rgba(56,189,248,0.2);
+}
+[data-theme="dark"] .category-chip:hover,
+[data-theme="dark"] .category-chip:focus-visible {
+  background-color: rgba(56,189,248,0.15);
+  border-color: rgba(56,189,248,0.5);
+  color: #fff;
+}
+
+.hero-search-input::placeholder {
+  color: #93B4CC;
+}
+.hero-search-input:focus {
+  border-color: #0369A1 !important;
+  box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.12) !important;
+  background-color: #FFFFFF !important;
+}
+
+/* ── モバイル: ボトムナビの高さ分パディング ── */
+@media (max-width: 767px) {
+  #main-content {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  }
+  footer {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ── モーション軽減 (WCAG 2.3.3) ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── 印刷スタイル ── */
+@media print {
+  header,
+  footer,
+  nav,
+  button,
+  textarea,
+  form,
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  body {
+    background-color: #fff !important;
+    color: #000 !important;
+    font-size: 10.5pt;
+  }
+
+  a::after {
+    content: none !important;
+  }
+
+  h1, h2, h3 {
+    color: #000 !important;
+  }
+
+  section,
+  article {
+    page-break-inside: avoid;
+  }
+
+  [role="tablist"],
+  [role="tab"] {
+    display: none !important;
+  }
+
+  * {
+    background-color: transparent !important;
+    border-color: #ccc !important;
+    box-shadow: none !important;
+  }
 }

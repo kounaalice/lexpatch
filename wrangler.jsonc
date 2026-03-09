@@ -13,6 +13,25 @@
     {
       "binding": "NEXT_INC_CACHE_R2_BUCKET",
       "bucket_name": "lexpatch-cache"
+    },
+    {
+      "binding": "FILES_BUCKET",
+      "bucket_name": "lexpatch-files"
+    }
+  ],
+  // Workers AI バインディング（法令AIアシスタント用）
+  "ai": {
+    "binding": "AI"
+  },
+  // Vectorize バインディング（AI法令セマンティック検索用 + W100知識分類用）
+  "vectorize": [
+    {
+      "binding": "VECTORIZE",
+      "index_name": "lexpatch-laws"
+    },
+    {
+      "binding": "VECTORIZE_W100",
+      "index_name": "lexpatch-w100"
     }
   ],
   "workers_dev": true,

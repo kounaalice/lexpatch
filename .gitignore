@@ -39,6 +39,20 @@ yarn-error.log*
 # OpenNext / Cloudflare Pages
 .open-next/
 
+# Cloudflare Wrangler state
+.wrangler/
+
+# Claude Code session artifacts
+.claude/plan.md
+
+# Local research / documents
+*.pdf
+*.pages
+__fetch/
+consolidation-*.txt
+consolidation-*.md
+note-*.md
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

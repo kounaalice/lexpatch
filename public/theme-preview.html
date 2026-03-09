@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexCard テーマプレビュー — 通常 / ゲーミング × 6テーマ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Cinzel:wght@400;700&family=EB+Garamond:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'BIZ UDPGothic', sans-serif; background: #111; color: #eee; }
+
+.header {
+  text-align: center;
+  padding: 32px 16px 16px;
+}
+.header h1 { font-size: 28px; letter-spacing: 0.05em; }
+.header p { color: #888; margin-top: 8px; font-size: 14px; }
+
+.mode-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 24px 0 8px;
+}
+.mode-tab {
+  padding: 10px 32px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: inherit;
+  background: #222;
+  color: #aaa;
+  transition: all 0.3s;
+}
+.mode-tab.active {
+  background: #0369A1;
+  color: #fff;
+  border-color: #0369A1;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  padding: 24px 32px 48px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.stage {
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
+}
+.stage:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+
+.stage-label {
+  text-align: center;
+  padding: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+.stage-body {
+  padding: 20px;
+  min-height: 420px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== Card component ===== */
+.law-card {
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+.law-card h3 { font-size: 15px; margin-bottom: 6px; }
+.law-card p { font-size: 12px; line-height: 1.7; opacity: 0.85; }
+.law-card .tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+/* ===== Button ===== */
+.btn {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  margin-top: 8px;
+  transition: all 0.3s;
+}
+
+/* ===== XP Bar (gaming only) ===== */
+.xp-bar-wrap {
+  margin-bottom: 16px;
+  display: none;
+}
+.gaming .xp-bar-wrap { display: block; }
+.xp-label { font-size: 11px; margin-bottom: 4px; opacity: 0.7; }
+.xp-bar {
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.xp-fill {
+  height: 100%;
+  border-radius: 4px;
+  width: 65%;
+  transition: width 1s;
+}
+
+/* ===== BG decorations (gaming only) ===== */
+.bg-deco {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+  overflow: hidden;
+}
+.gaming .bg-deco { opacity: 1; }
+
+/* ===== Floating particles ===== */
+@keyframes float-up {
+  0% { transform: translateY(100%) scale(0.5); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-100%) scale(1); opacity: 0; }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+@keyframes flicker {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes rainbow-shift {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+@keyframes bubble {
+  0% { transform: translateY(0) scale(1); opacity: 0.6; }
+  100% { transform: translateY(-300px) scale(0.3); opacity: 0; }
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+.particle {
+  position: absolute;
+  animation: float-up linear infinite;
+  font-size: 14px;
+}
+
+/* ============================================
+   THEME: ライト
+   ============================================ */
+.theme-light .stage-label { background: #0369A1; color: #fff; }
+.theme-light .stage-body { background: #EFF8FF; color: #1E3A5F; }
+.theme-light .law-card { background: #fff; border: 1px solid #BAE6FD; }
+.theme-light .law-card .tag { background: #DBEAFE; color: #0369A1; }
+.theme-light .btn { background: #0369A1; color: #fff; }
+.theme-light .xp-bar { background: #DBEAFE; }
+.theme-light .xp-fill { background: #0369A1; }
+
+/* ============================================
+   THEME: ダーク
+   ============================================ */
+.theme-dark .stage-label { background: #1E293B; color: #94A3B8; }
+.theme-dark .stage-body { background: #0F172A; color: #CBD5E1; }
+.theme-dark .law-card { background: #1E293B; border: 1px solid #334155; }
+.theme-dark .law-card h3 { color: #E2E8F0; }
+.theme-dark .law-card .tag { background: #334155; color: #94A3B8; }
+.theme-dark .btn { background: #38BDF8; color: #0F172A; }
+.theme-dark .xp-bar { background: #334155; }
+.theme-dark .xp-fill { background: #38BDF8; }
+
+/* ============================================
+   THEME: ゴシック
+   ============================================ */
+.theme-gothic .stage-label { background: #2A0A0A; color: #C9A84C; letter-spacing: 0.2em; }
+.theme-gothic .stage-body {
+  background: #1A0A0A; color: #D4C4A0;
+  font-family: 'Cinzel', '游明朝', 'Yu Mincho', serif;
+}
+.theme-gothic .law-card {
+  background: #2A1010;
+  border: 2px double #8B0000;
+  border-radius: 4px;
+}
+.theme-gothic .law-card h3 { color: #C9A84C; font-family: 'Cinzel', serif; }
+.theme-gothic .law-card .tag { background: #3A1515; color: #8B0000; border: 1px solid #8B0000; border-radius: 2px; }
+.theme-gothic .btn {
+  background: transparent; color: #C9A84C;
+  border: 1px solid #C9A84C; border-radius: 2px;
+}
+.theme-gothic .xp-bar { background: #3A1515; }
+.theme-gothic .xp-fill { background: linear-gradient(90deg, #8B0000, #C9A84C); }
+
+/* Gothic gaming: damask + candle */
+.theme-gothic .bg-deco {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 L35 25 L30 20 L25 25Z' fill='%238B0000' opacity='0.08'/%3E%3Cpath d='M30 35 L35 55 L30 50 L25 55Z' fill='%238B0000' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* ============================================
+   THEME: クラシック
+   ============================================ */
+.theme-classic .stage-label { background: #5C4033; color: #F5E6D0; }
+.theme-classic .stage-body {
+  background: #FDF8F0; color: #5C4033;
+  font-family: 'EB Garamond', '游明朝', 'Yu Mincho', serif;
+}
+.theme-classic .law-card {
+  background: #FFFBF5;
+  border: 1px solid #D4B896;
+  box-shadow: 2px 3px 8px rgba(92,64,51,0.1);
+  border-radius: 8px;
+}
+.theme-classic .law-card h3 { color: #7B5B3A; font-family: 'EB Garamond', serif; }
+.theme-classic .law-card .tag { background: #F5E6D0; color: #8B6914; }
+.theme-classic .btn {
+  background: #B8860B; color: #FDF8F0;
+  border-radius: 20px;
+}
+.theme-classic .xp-bar { background: #F0DFC8; }
+.theme-classic .xp-fill { background: linear-gradient(90deg, #B8860B, #D4A843); }
+
+/* Classic gaming: parchment texture */
+.theme-classic .bg-deco {
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='10' y='10' width='60' height='60' rx='30' fill='%23D4B896' opacity='0.05'/%3E%3Cpath d='M5 40 Q20 30 40 40 Q60 50 75 40' stroke='%23D4B896' fill='none' opacity='0.06'/%3E%3C/svg%3E");
+}
+
+/* ============================================
+   THEME: ゆめかわ
+   ============================================ */
+.theme-yumekawa .stage-label {
+  background: linear-gradient(90deg, #F9A8D4, #C4B5FD);
+  color: #fff;
+}
+.theme-yumekawa .stage-body {
+  background: #FFF0F5; color: #7C3A6B;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+}
+.theme-yumekawa .law-card {
+  background: linear-gradient(135deg, #FFF5F9 0%, #F5F0FF 100%);
+  border: 2px solid #F9A8D4;
+  border-radius: 20px;
+}
+.theme-yumekawa .law-card h3 { color: #D946A8; }
+.theme-yumekawa .law-card .tag {
+  background: linear-gradient(90deg, #FBCFE8, #DDD6FE);
+  color: #A855F7;
+  border-radius: 20px;
+}
+.theme-yumekawa .btn {
+  background: linear-gradient(90deg, #F472B6, #A78BFA);
+  color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 0 12px rgba(244,114,182,0.4);
+}
+.theme-yumekawa .xp-bar { background: #FCE7F3; }
+.theme-yumekawa .xp-fill { background: linear-gradient(90deg, #F472B6, #A78BFA); }
+
+/* ============================================
+   THEME: みずいろ
+   ============================================ */
+.theme-mizuiro .stage-label {
+  background: linear-gradient(90deg, #7DD3FC, #38BDF8);
+  color: #fff;
+}
+.theme-mizuiro .stage-body {
+  background: #EFF8FF; color: #1E3A5F;
+}
+.theme-mizuiro .law-card {
+  background: rgba(255,255,255,0.7);
+  border: 1px solid #BAE6FD;
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+}
+.theme-mizuiro .law-card h3 { color: #0369A1; }
+.theme-mizuiro .law-card .tag { background: #DBEAFE; color: #0369A1; }
+.theme-mizuiro .btn {
+  background: #0EA5E9; color: #fff;
+  border-radius: 8px;
+}
+.theme-mizuiro .xp-bar { background: #DBEAFE; }
+.theme-mizuiro .xp-fill { background: linear-gradient(90deg, #38BDF8, #0EA5E9); }
+
+/* Gaming: ice crystals + bubbles */
+.theme-mizuiro .bg-deco {
+  background: radial-gradient(circle at 20% 80%, rgba(186,230,253,0.15) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(56,189,248,0.1) 0%, transparent 50%);
+}
+
+/* ===== Gaming mode card shimmer ===== */
+.gaming .law-card.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+.gaming .law-card { position: relative; overflow: hidden; }
+
+/* ===== Responsive ===== */
+@media (max-width: 1000px) {
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 16px; }
+}
+@media (max-width: 600px) {
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>LexCard テーマ × モード プレビュー</h1>
+  <p>6テーマ × 2モード = 12パターン</p>
+</div>
+
+<div class="mode-tabs">
+  <button class="mode-tab active" onclick="setMode('normal')">通常モード</button>
+  <button class="mode-tab" onclick="setMode('gaming')">ゲーミングモード</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const themes = [
+  {
+    id: 'light', name: 'ライト',
+    normalSub: '標準', gamingSub: '法令の庭',
+    particles: ['☁','🌿','🕊'],
+  },
+  {
+    id: 'dark', name: 'ダーク',
+    normalSub: '標準', gamingSub: '星夜の書斎',
+    particles: ['⭐','✨','🌙'],
+  },
+  {
+    id: 'gothic', name: 'ゴシック',
+    normalSub: '黒薔薇', gamingSub: '黒薔薇の大聖堂',
+    particles: ['🕯','🥀','✝','🦇'],
+  },
+  {
+    id: 'classic', name: 'クラシック',
+    normalSub: '金箔書庫', gamingSub: 'ヴィクトリアンの書庫',
+    particles: ['🍂','📜','🪶','🫖'],
+  },
+  {
+    id: 'yumekawa', name: 'ゆめかわ',
+    normalSub: 'パステル', gamingSub: 'お菓子の魔法城',
+    particles: ['⭐','🎀','🍭','💖','🦄'],
+  },
+  {
+    id: 'mizuiro', name: 'みずいろ',
+    normalSub: '水色魔法', gamingSub: '氷の魔法宮殿',
+    particles: ['❄','💎','🫧','✨'],
+  },
+];
+
+let currentMode = 'normal';
+
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  render();
+}
+
+function createParticles(theme) {
+  let html = '';
+  for (let i = 0; i < 12; i++) {
+    const emoji = theme.particles[i % theme.particles.length];
+    const left = Math.random() * 90 + 5;
+    const delay = Math.random() * 6;
+    const dur = 4 + Math.random() * 4;
+    const size = 10 + Math.random() * 14;
+    html += `<span class="particle" style="left:${left}%;animation-delay:${delay}s;animation-duration:${dur}s;font-size:${size}px">${emoji}</span>`;
+  }
+  return html;
+}
+
+function render() {
+  const grid = document.getElementById('grid');
+  const isGaming = currentMode === 'gaming';
+
+  grid.innerHTML = themes.map(t => `
+    <div class="stage theme-${t.id} ${isGaming ? 'gaming' : ''}">
+      <div class="stage-label">
+        ${t.name}${isGaming ? ` — ${t.gamingSub}` : ` — ${t.normalSub}`}
+      </div>
+      <div class="stage-body">
+        <div class="bg-deco">${isGaming ? createParticles(t) : ''}</div>
+
+        <div class="xp-bar-wrap">
+          <div class="xp-label">Lv.12 法令探究者 — 1,280 / 2,000 XP</div>
+          <div class="xp-bar"><div class="xp-fill"></div></div>
+        </div>
+
+        <div class="law-card ${isGaming ? 'shimmer' : ''}">
+          <h3>民法</h3>
+          <p>第四百十五条　債務者がその債務の本旨に従った履行をしないとき又は債務の履行が不能であるときは、債権者は、これによって生じた損害の賠償を請求することができる。</p>
+          <span class="tag">民事法</span>
+        </div>
+
+        <div class="law-card ${isGaming ? 'shimmer' : ''}">
+          <h3>行政手続法</h3>
+          <p>第三条　処分、行政指導及び届出に関する手続に関しこの法律に規定する事項について、他の法律に特別の定めがある場合は、その定めるところによる。</p>
+          <span class="tag">行政法</span>
+        </div>
+
+        <button class="btn">条文を読む</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+render();
+</script>
+</body>
+</html>

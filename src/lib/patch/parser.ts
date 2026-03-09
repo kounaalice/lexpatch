@@ -51,8 +51,9 @@ export function parsePatch(plainText: string, targetArticle?: string): PatchData
     // 条番号ヘッダ行（例: "第百十二条" or "+第百十二条"）
     if (ARTICLE_HEADER_RE.test(trimmed)) {
       if (!foundHeader) {
-        detectedArticle = restTrimmed.match(/^(第[一二三四五六七八九十百千\d]+条[のの二三四五六七八九十]*)/)
-          ?.[1] ?? restTrimmed;
+        detectedArticle =
+          restTrimmed.match(/^(第[一二三四五六七八九十百千\d]+条[のの二三四五六七八九十]*)/)?.[1] ??
+          restTrimmed;
         foundHeader = true;
       }
       // C記法: +/− が条番号ヘッダについている

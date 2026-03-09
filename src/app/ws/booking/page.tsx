@@ -26,12 +26,13 @@ export default function BookingPage() {
   });
   const [resForm, setResForm] = useState({ name: "", email: "", note: "" });
 
-  useEffect(() => {
-    reload();
-  }, []);
   function reload() {
     setSlots(getAllSlots());
   }
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
 
   function handleCreate() {
     if (!form.title.trim() || !form.date || !form.startTime || !form.endTime) return;

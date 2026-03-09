@@ -23,6 +23,13 @@ interface WsForm {
   updated_at: string;
 }
 
+interface FormResponse {
+  id: string;
+  submitted_at: string;
+  respondent_name?: string;
+  data?: Record<string, unknown>;
+}
+
 type View = "list" | "builder" | "responses";
 
 function authHeader(s: Session) {
@@ -41,18 +48,10 @@ export default function WsFormsPage() {
   const [fields, setFields] = useState<FormField[]>([]);
   // Responses state
   const [responseFormId, setResponseFormId] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [responses, setResponses] = useState<any[]>([]);
+  const [responses, setResponses] = useState<FormResponse[]>([]);
   // Approval integration
   const [autoApproval, setAutoApproval] = useState(false);
   const [approvalCreated, setApprovalCreated] = useState(false);
-
-  useEffect(() => {
-    const s = getSession();
-    setSession(s);
-    if (s) fetchForms(s);
-    else setLoading(false);
-  }, []);
 
   async function fetchForms(s: Session) {
     setLoading(true);
@@ -63,6 +62,13 @@ export default function WsFormsPage() {
     }
     setLoading(false);
   }
+
+  useEffect(() => {
+    const s = getSession();
+    setSession(s); // eslint-disable-line react-hooks/set-state-in-effect
+    if (s) fetchForms(s);
+    else setLoading(false);
+  }, []);
 
   function startNew() {
     setEditId(null);
@@ -415,7 +421,7 @@ export default function WsFormsPage() {
   function getFieldAgg(field: FormField) {
     const vals = responses
       .map((r) => r.data?.[field.id])
-      .filter((v: any) => v !== undefined && v !== null && v !== "");
+      .filter((v): v is NonNullable<typeof v> => v !== undefined && v !== null && v !== "");
     if (vals.length === 0) return null;
     if (field.type === "number") {
       const nums = vals.map(Number).filter((n) => !isNaN(n));

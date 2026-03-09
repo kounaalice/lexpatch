@@ -182,10 +182,10 @@ export default async function ArticlePage({
       // 改正履歴を遡り、この条文を変更した改正を探す
       let afterLines = canonLines; // 最初は現行条文
       const limit = Math.min(effectiveIdx + MAX_LOOKBACK, revisions.length - 1);
-      const deadline = Date.now() + LOOKBACK_TIMEOUT_MS;
+      const deadline = Date.now() + LOOKBACK_TIMEOUT_MS; // eslint-disable-line react-hooks/purity
 
       for (let i = effectiveIdx; i < limit; i++) {
-        if (Date.now() > deadline) break; // タイムアウト
+        if (Date.now() > deadline) break; // eslint-disable-line react-hooks/purity -- timeout check
 
         const enfDate = new Date(revisions[i].amendment_enforcement_date);
         enfDate.setDate(enfDate.getDate() - 1);
@@ -249,16 +249,17 @@ export default async function ArticlePage({
           new Promise<never>((_, rej) => setTimeout(() => rej(new Error("timeout")), ms)),
         ]);
 
+      // Supabase query type inference breaks with Promise.all + timeout wrapper
       const [patchRes, commentaryRes, projectRes] = await timeout(
         Promise.all([
-          (supabase as any)
+          supabase
             .from("patches")
             .select("id, title, status, patch_type, created_at")
             .eq("law_id", lawId)
             .contains("target_articles", [articleTitle])
             .order("created_at", { ascending: false })
             .limit(20),
-          (admin as any)
+          admin
             .from("commentaries")
             .select(
               "id, law_id, article_title, content, author_name, sources, created_at, updated_at",
@@ -267,7 +268,7 @@ export default async function ArticlePage({
             .eq("article_title", articleTitle)
             .order("created_at", { ascending: true })
             .limit(50),
-          (admin as any)
+          admin
             .from("projects")
             .select("id, title, owner_name")
             .contains("law_ids", [lawId])

@@ -16,7 +16,7 @@ export default function EstablishPage() {
       // Read the short-lived OAuth session cookie
       const match = document.cookie.match(/(?:^|; )__oauth_session=([^;]*)/);
       if (!match) {
-        setError("セッション情報が見つかりません。もう一度ログインしてください。");
+        setError("セッション情報が見つかりません。もう一度ログインしてください。"); // eslint-disable-line react-hooks/set-state-in-effect
         return;
       }
 

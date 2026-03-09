@@ -9,19 +9,22 @@
  *   light — Llama 3.2-1B … ガイドアシスタント（FAQ応答、低 neuron コスト）
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getAI(): Promise<any> {
+/** Cloudflare Workers AI binding — runtime-only, no published type definitions */
+export interface CfAiBinding {
+  run(model: string, options: Record<string, unknown>): Promise<unknown>;
+}
+
+export async function getAI(): Promise<CfAiBinding | null> {
   try {
     const { getCloudflareContext } = await import("@opennextjs/cloudflare");
     const ctx = await getCloudflareContext({ async: true });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (ctx.env as any).AI ?? null;
+    return ((ctx.env as Record<string, unknown>).AI as CfAiBinding) ?? null;
   } catch {
     return null;
   }
 }
 
-export function isAiAvailable(ai: unknown): boolean {
+export function isAiAvailable(ai: CfAiBinding | null | undefined): ai is CfAiBinding {
   return !!ai;
 }
 
@@ -191,7 +194,7 @@ export function estimateTokenCount(text: string): number {
  */
 
 export async function streamAiChat(
-  ai: any,
+  ai: CfAiBinding,
   model: string,
   messages: AiMessage[],
   systemPrompt: string,
@@ -211,16 +214,16 @@ export async function streamAiChat(
  */
 
 export async function runAiChat(
-  ai: any,
+  ai: CfAiBinding,
   model: string,
   messages: AiMessage[],
   systemPrompt: string,
 ): Promise<string> {
-  const resp = await ai.run(model, {
+  const resp = (await ai.run(model, {
     messages: [
       { role: "system", content: systemPrompt },
       ...messages.map((m) => ({ role: m.role, content: m.content })),
     ],
-  });
+  })) as { response?: string } | null;
   return resp?.response ?? "";
 }

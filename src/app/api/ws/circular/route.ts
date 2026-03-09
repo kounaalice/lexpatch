@@ -2,41 +2,59 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { verifySessionToken } from "@/lib/crypto";
 
+// ws_circulars / ws_circular_confirmations tables are not in Database type definition
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function db(): any {
+  return createAdminClient();
+}
+
+interface CircularRow {
+  id: string;
+  author_id: string;
+  target_member_ids?: string[];
+  [key: string]: unknown;
+}
+
+interface ConfirmationRow {
+  circular_id: string;
+  [key: string]: unknown;
+}
+
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const memberId = sp.get("member_id");
   const role = sp.get("role") || "all"; // author | target | all
-  const db = createAdminClient() as any;
+  const client = db();
 
-  const { data, error } = await db
+  const { data, error } = await client
     .from("ws_circulars")
     .select("*, author:member_profiles!author_id(id,name)")
     .order("created_at", { ascending: false })
     .limit(100);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  let filtered = data || [];
+  let filtered: CircularRow[] = data || [];
   if (memberId && role === "author") {
-    filtered = filtered.filter((c: any) => c.author_id === memberId);
+    filtered = filtered.filter((c) => c.author_id === memberId);
   } else if (memberId && role === "target") {
     filtered = filtered.filter(
-      (c: any) => c.author_id === memberId || (c.target_member_ids || []).includes(memberId),
+      (c) => c.author_id === memberId || (c.target_member_ids || []).includes(memberId),
     );
   }
 
   // Attach confirmations
   if (filtered.length > 0) {
-    const ids = filtered.map((c: any) => c.id);
-    const { data: confs } = await db
+    const ids = filtered.map((c) => c.id);
+    const { data: confs } = await client
       .from("ws_circular_confirmations")
       .select("*")
       .in("circular_id", ids);
-    const confMap: Record<string, any[]> = {};
-    for (const c of confs || []) {
+    const confMap: Record<string, ConfirmationRow[]> = {};
+    for (const c of (confs || []) as ConfirmationRow[]) {
       if (!confMap[c.circular_id]) confMap[c.circular_id] = [];
       confMap[c.circular_id].push(c);
     }
-    filtered = filtered.map((c: any) => ({
+    filtered = filtered.map((c) => ({
       ...c,
       confirmations: confMap[c.id] || [],
     }));
@@ -51,8 +69,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const body = await req.json();
-  const db = createAdminClient() as any;
-  const { data, error } = await db
+  const client = db();
+  const { data, error } = await client
     .from("ws_circulars")
     .insert({
       author_id: auth[0],
@@ -75,10 +93,10 @@ export async function PATCH(req: NextRequest) {
   }
   const memberId = auth[0];
   const body = await req.json();
-  const db = createAdminClient() as any;
+  const client = db();
 
   if (body.action === "confirm") {
-    await db.from("ws_circular_confirmations").upsert({
+    await client.from("ws_circular_confirmations").upsert({
       circular_id: body.circular_id,
       member_id: memberId,
       comment: body.comment || "",
@@ -87,7 +105,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   if (body.action === "close") {
-    await db
+    await client
       .from("ws_circulars")
       .update({ status: "closed" })
       .eq("id", body.id)
@@ -105,7 +123,7 @@ export async function DELETE(req: NextRequest) {
   }
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
-  const db = createAdminClient() as any;
-  await db.from("ws_circulars").delete().eq("id", id).eq("author_id", auth[0]);
+  const client = db();
+  await client.from("ws_circulars").delete().eq("id", id).eq("author_id", auth[0]);
   return NextResponse.json({ ok: true });
 }

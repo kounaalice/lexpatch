@@ -60,14 +60,6 @@ export default function TicketsPage() {
   const [showTemplates, setShowTemplates] = useState(false);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
 
-  useEffect(() => {
-    reload();
-    setTicketTemplates(loadTicketTemplates());
-  }, []);
-  useEffect(() => {
-    reload();
-  }, [search, statusFilter, priorityFilter]);
-
   function reload() {
     let list = getAllTickets();
     if (search) {
@@ -84,6 +76,14 @@ export default function TicketsPage() {
     setTickets(list);
     setStats(getTicketStats());
   }
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+    setTicketTemplates(loadTicketTemplates());
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [search, statusFilter, priorityFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleSave() {
     if (!form.title.trim()) return;

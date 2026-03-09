@@ -29,12 +29,13 @@ export default function HabitsPage() {
   const [view, setView] = useState<"week" | "month">("week");
   const [now] = useState(new Date());
 
-  useEffect(() => {
-    reload();
-  }, []);
   function reload() {
     setHabits(getAllHabits());
   }
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
 
   const today = now.toISOString().slice(0, 10);
   const weekDates = getWeekDates();

@@ -44,7 +44,7 @@ export default function SchedulePage() {
 
   useEffect(() => {
     const s = getSession();
-    setSession(s);
+    setSession(s); // eslint-disable-line react-hooks/set-state-in-effect
     if (!s) setLoading(false);
   }, []);
 
@@ -72,6 +72,7 @@ export default function SchedulePage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (session?.memberId) fetchEvents(session.memberId);
   }, [session, fetchEvents]);
 

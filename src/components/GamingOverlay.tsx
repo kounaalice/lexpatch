@@ -7,16 +7,16 @@ import { loadSettings } from "@/lib/settings";
 const PARTICLES = ["\u2696\uFE0F", "\uD83D\uDCDC", "\uD83C\uDFDB\uFE0F", "\u2728", "\uD83D\uDCAB"];
 
 export function GamingOverlay() {
-  const [active, setActive] = useState(false);
-  const [tracking, setTracking] = useState(false);
+  const [active, setActive] = useState(
+    () =>
+      typeof document !== "undefined" &&
+      document.documentElement.getAttribute("data-gaming") === "true",
+  );
+  const [tracking] = useState(() => !loadSettings().disableGamingData);
   const [xp, setXp] = useState(0);
   const [activityPt, setActivityPt] = useState(0);
 
   useEffect(() => {
-    setActive(document.documentElement.getAttribute("data-gaming") === "true");
-    // データ蓄積が無効でなければ常にトラッキング
-    setTracking(!loadSettings().disableGamingData);
-
     const observer = new MutationObserver(() => {
       setActive(document.documentElement.getAttribute("data-gaming") === "true");
     });
@@ -30,8 +30,7 @@ export function GamingOverlay() {
   // XP tracking (scroll) — ゲーミング表示OFF時もバックグラウンドで蓄積
   useEffect(() => {
     if (!tracking) return;
-    const stored = parseInt(localStorage.getItem("lp_xp") || "0", 10);
-    setXp(stored);
+    setXp(parseInt(localStorage.getItem("lp_xp") || "0", 10)); // eslint-disable-line react-hooks/set-state-in-effect
 
     let ticking = false;
     const onScroll = () => {
@@ -55,7 +54,7 @@ export function GamingOverlay() {
   // Activity points tracking (listen for custom event)
   useEffect(() => {
     if (!tracking) return;
-    setActivityPt(parseInt(localStorage.getItem("lp_activity_points") || "0", 10));
+    setActivityPt(parseInt(localStorage.getItem("lp_activity_points") || "0", 10)); // eslint-disable-line react-hooks/set-state-in-effect
 
     const onActivity = () => {
       setActivityPt(parseInt(localStorage.getItem("lp_activity_points") || "0", 10));

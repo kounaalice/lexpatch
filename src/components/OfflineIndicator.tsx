@@ -3,17 +3,19 @@
 import { useState, useEffect } from "react";
 
 export function OfflineIndicator() {
-  const [isOffline, setIsOffline] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isOffline, setIsOffline] = useState(() =>
+    typeof navigator !== "undefined" ? !navigator.onLine : false,
+  );
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 767px)").matches : false,
+  );
 
   useEffect(() => {
     const update = () => setIsOffline(!navigator.onLine);
-    update();
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
 
     const mq = window.matchMedia("(max-width: 767px)");
-    setIsMobile(mq.matches);
     const mqHandler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener("change", mqHandler);
 

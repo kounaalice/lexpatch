@@ -5,22 +5,36 @@
  */
 
 import { logger } from "./logger";
+import type { CfAiBinding } from "./ai";
+
+// ── Cloudflare Vectorize バインディング型 ──
+
+/** Cloudflare Vectorize binding — runtime-only, no published type definitions */
+export interface CfVectorizeBinding {
+  query(
+    vector: number[],
+    options: Record<string, unknown>,
+  ): Promise<{ matches?: { id: string; score: number; metadata?: Record<string, string> }[] }>;
+  upsert(
+    vectors: { id: string; values: number[]; metadata?: Record<string, string> }[],
+  ): Promise<unknown>;
+}
 
 // ── Vectorize バインディング取得 ──
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getVectorize(): Promise<any> {
+export async function getVectorize(): Promise<CfVectorizeBinding | null> {
   try {
     const { getCloudflareContext } = await import("@opennextjs/cloudflare");
     const ctx = await getCloudflareContext({ async: true });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (ctx.env as any).VECTORIZE ?? null;
+    return ((ctx.env as Record<string, unknown>).VECTORIZE as CfVectorizeBinding) ?? null;
   } catch {
     return null;
   }
 }
 
-export function isVectorizeAvailable(v: unknown): boolean {
+export function isVectorizeAvailable(
+  v: CfVectorizeBinding | null | undefined,
+): v is CfVectorizeBinding {
   return !!v;
 }
 
@@ -42,11 +56,16 @@ export function estimateEmbeddingNeurons(tokenCount: number): number {
  * テキストをエンベディングに変換
  * @returns 1024次元のベクトル
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function embedText(ai: any, text: string): Promise<number[]> {
-  const resp = await ai.run(EMBEDDING_MODEL, {
+/** Workers AI embedding response shape */
+interface EmbeddingResponse {
+  shape?: number[];
+  data?: number[][];
+}
+
+export async function embedText(ai: CfAiBinding, text: string): Promise<number[]> {
+  const resp = (await ai.run(EMBEDDING_MODEL, {
     text: [text],
-  });
+  })) as EmbeddingResponse | null;
   // Workers AI embedding 応答: { shape: [1, 1024], data: [[...]] }
   if (resp?.data?.[0]) {
     return resp.data[0];
@@ -59,8 +78,7 @@ export async function embedText(ai: any, text: string): Promise<number[]> {
  * bge-m3 コンテキスト上限: 60,000 tokens — バッチ全テキストの合計が制限
  * 安全策: 小バッチ + 失敗時は1件ずつフォールバック
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function embedTexts(ai: any, texts: string[]): Promise<number[][]> {
+export async function embedTexts(ai: CfAiBinding, texts: string[]): Promise<number[][]> {
   if (texts.length === 0) return [];
 
   // バッチサイズ: 小さめに設定（bge-m3 の 60k token 上限対策）
@@ -70,9 +88,9 @@ export async function embedTexts(ai: any, texts: string[]): Promise<number[][]> 
   for (let i = 0; i < texts.length; i += BATCH_SIZE) {
     const batch = texts.slice(i, i + BATCH_SIZE);
     try {
-      const resp = await ai.run(EMBEDDING_MODEL, {
+      const resp = (await ai.run(EMBEDDING_MODEL, {
         text: batch,
-      });
+      })) as EmbeddingResponse | null;
       if (resp?.data) {
         results.push(...resp.data);
       } else {
@@ -85,9 +103,9 @@ export async function embedTexts(ai: any, texts: string[]): Promise<number[][]> 
       });
       for (const text of batch) {
         try {
-          const resp = await ai.run(EMBEDDING_MODEL, {
+          const resp = (await ai.run(EMBEDDING_MODEL, {
             text: [text.slice(0, 1500)], // 超長テキストは切り詰め
-          });
+          })) as EmbeddingResponse | null;
           if (resp?.data?.[0]) {
             results.push(resp.data[0]);
           } else {
@@ -132,8 +150,8 @@ export interface VectorSearchResult {
  */
 
 export async function searchSimilar(
-  vectorize: any,
-  ai: any,
+  vectorize: CfVectorizeBinding,
+  ai: CfAiBinding,
   query: string,
   topK = 5,
 ): Promise<VectorSearchResult[]> {
@@ -185,7 +203,7 @@ export interface ArticleVectorEntry {
  */
 
 export async function upsertVectors(
-  vectorize: any,
+  vectorize: CfVectorizeBinding,
   entries: ArticleVectorEntry[],
 ): Promise<{ count: number }> {
   if (entries.length === 0) return { count: 0 };

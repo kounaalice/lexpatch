@@ -433,8 +433,13 @@ function ConsolidatedLawEditor({
           ? law.chapters.flatMap((ch: { articles: unknown[] }) => ch.articles)
           : (law.articles ?? []);
 
-      const article = allArticles.find(
-        (a: any) => a.num === ref.article_num || a.title === ref.article_title,
+      interface ArticleShape {
+        num: string;
+        title: string;
+        paragraphs: { num: string; sentences: string[] }[];
+      }
+      const article = (allArticles as ArticleShape[]).find(
+        (a) => a.num === ref.article_num || a.title === ref.article_title,
       );
 
       if (!article) return [];

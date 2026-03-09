@@ -13,6 +13,7 @@ export async function ensureAnonymousSession(): Promise<string | null> {
   // 匿名サインイン
   const { data, error } = await supabase.auth.signInAnonymously();
   if (error) {
+    // eslint-disable-next-line no-console -- クライアントサイドSDKエラー
     console.error("匿名サインイン失敗:", error.message);
     return null;
   }

@@ -38,7 +38,7 @@ export function RefPopup({ text, anchorRect, onClose }: RefPopupProps) {
       if (top < margin) top = margin;
     }
 
-    setPos({ top, left });
+    setPos({ top, left }); // eslint-disable-line react-hooks/set-state-in-effect
   }, [anchorRect]);
 
   // 外側クリックで閉じる

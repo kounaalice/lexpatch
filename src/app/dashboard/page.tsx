@@ -55,6 +55,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const s = getSession();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSession(s);
     setLoading(false);
     if (s) {

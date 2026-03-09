@@ -27,17 +27,17 @@ export default function RssPage() {
   const [feedForm, setFeedForm] = useState({ title: "", url: "", category: FEED_CATEGORIES[0] });
   const [itemForm, setItemForm] = useState({ title: "", description: "", link: "", pubDate: "" });
 
-  useEffect(() => {
-    reload();
-  }, []);
-  useEffect(() => {
-    reload();
-  }, [selectedFeedId]);
-
   function reload() {
     setFeeds(getAllFeeds());
     setItems(selectedFeedId ? getItemsByFeed(selectedFeedId) : getAllItems());
   }
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [selectedFeedId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleAddFeed(f?: { title: string; url: string; category: string }) {
     const data = f || feedForm;

@@ -120,15 +120,6 @@ export default function WsApprovalsPage() {
   const [stageApprovers, setStageApprovers] = useState<{ name: string }[]>([{ name: "" }]);
   const [proxyApproval, setProxyApproval] = useState(false);
 
-  useEffect(() => {
-    const s = getSession();
-    setSession(s);
-    if (s) {
-      fetchApprovals(s, "my");
-      fetchMembers();
-    } else setLoading(false);
-  }, []);
-
   async function fetchApprovals(s: Session, role: Tab) {
     setLoading(true);
     const r = await fetch(
@@ -150,6 +141,15 @@ export default function WsApprovalsPage() {
       );
     }
   }
+
+  useEffect(() => {
+    const s = getSession();
+    setSession(s); // eslint-disable-line react-hooks/set-state-in-effect
+    if (s) {
+      fetchApprovals(s, "my");
+      fetchMembers();
+    } else setLoading(false);
+  }, []);
 
   function switchTab(t: Tab) {
     setTab(t);

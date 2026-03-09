@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAI, isAiAvailable, estimateTokenCount } from "@/lib/ai";
+import { getAI, isAiAvailable, estimateTokenCount, type CfAiBinding } from "@/lib/ai";
 import {
   getVectorize,
   isVectorizeAvailable,
@@ -7,6 +7,7 @@ import {
   upsertVectors,
   vectorId,
   type ArticleVectorEntry,
+  type CfVectorizeBinding,
 } from "@/lib/vectorize";
 import { serializeArticle } from "@/lib/ai-context";
 import { getLawData } from "@/lib/egov/client";
@@ -95,8 +96,8 @@ interface IndexResult {
 }
 
 async function indexOneLaw(
-  ai: any,
-  vectorize: any,
+  ai: CfAiBinding,
+  vectorize: CfVectorizeBinding,
   lawId: string,
   fallbackTitle: string,
 ): Promise<IndexResult> {

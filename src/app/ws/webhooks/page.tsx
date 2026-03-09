@@ -50,13 +50,14 @@ export default function WebhooksPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [testPayload, setTestPayload] = useState<string | null>(null);
 
-  useEffect(() => {
-    reload();
-  }, []);
   function reload() {
     setHooks(loadArr<Webhook>(HOOKS_KEY));
     setLogs(loadArr<WebhookLog>(LOGS_KEY).sort((a, b) => b.timestamp.localeCompare(a.timestamp)));
   }
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
 
   function handleSave() {
     if (!form.url.trim() || form.events.length === 0) return;

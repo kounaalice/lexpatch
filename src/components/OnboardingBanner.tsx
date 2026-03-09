@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 interface Props {
@@ -8,13 +8,11 @@ interface Props {
 }
 
 export default function OnboardingBanner({ situationCompleted }: Props) {
-  const [dismissed, setDismissed] = useState(true); // hidden by default until check
-
-  useEffect(() => {
-    if (situationCompleted) return;
-    const d = localStorage.getItem("lp_onboarding_dismissed");
-    setDismissed(!!d);
-  }, [situationCompleted]);
+  const [dismissed, setDismissed] = useState(() => {
+    if (situationCompleted) return true;
+    if (typeof window === "undefined") return true;
+    return !!localStorage.getItem("lp_onboarding_dismissed");
+  });
 
   if (situationCompleted || dismissed) return null;
 

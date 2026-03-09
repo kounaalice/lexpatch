@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getSession } from "@/lib/session";
+import { getSession, type Session } from "@/lib/session";
 
 interface Circular {
   id: string;
@@ -27,17 +27,8 @@ export default function CircularPage() {
   });
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [confirmComment, setConfirmComment] = useState("");
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [tab, setTab] = useState<"received" | "sent">("received");
-
-  useEffect(() => {
-    const s = getSession();
-    setSession(s);
-    if (s?.memberId) {
-      fetchCirculars(s.memberId);
-      fetchMembers();
-    }
-  }, []);
 
   function authHeader(): Record<string, string> {
     if (!session) return {};
@@ -60,6 +51,15 @@ export default function CircularPage() {
     }
   }
 
+  useEffect(() => {
+    const s = getSession();
+    setSession(s); // eslint-disable-line react-hooks/set-state-in-effect
+    if (s?.memberId) {
+      fetchCirculars(s.memberId);
+      fetchMembers();
+    }
+  }, []);
+
   async function handleCreate() {
     if (!form.title.trim() || form.targetIds.length === 0) return;
     const res = await fetch("/api/ws/circular", {
@@ -75,7 +75,7 @@ export default function CircularPage() {
     if (res.ok) {
       setForm({ title: "", content: "", targetIds: [], deadline: "" });
       setShowForm(false);
-      fetchCirculars(session.memberId);
+      if (session) fetchCirculars(session.memberId);
     }
   }
 
@@ -86,7 +86,7 @@ export default function CircularPage() {
       body: JSON.stringify({ action: "confirm", circular_id: circularId, comment: confirmComment }),
     });
     setConfirmComment("");
-    fetchCirculars(session.memberId);
+    if (session) fetchCirculars(session.memberId);
   }
 
   async function handleClose(id: string) {
@@ -95,7 +95,7 @@ export default function CircularPage() {
       headers: { "Content-Type": "application/json", ...authHeader() },
       body: JSON.stringify({ action: "close", id }),
     });
-    fetchCirculars(session.memberId);
+    if (session) fetchCirculars(session.memberId);
   }
 
   if (!session) {

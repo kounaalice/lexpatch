@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
       .eq("member_id", data.id);
     if (memberships) {
       communities = memberships
-        .map((m: any) => ({
+        .map((m: { communities?: { id: string; name: string } }) => ({
           id: m.communities?.id,
           name: m.communities?.name,
           member_count: 0,

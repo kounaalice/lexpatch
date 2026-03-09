@@ -41,7 +41,7 @@ export function AiGuideButton() {
   // AI有効チェック + ログインチェック + ユーザー設定 aiMode
   useEffect(() => {
     const session = getSession();
-    setLoggedIn(!!session);
+    setLoggedIn(!!session); // eslint-disable-line react-hooks/set-state-in-effect
     setConsented(hasConsent());
 
     const userAi = localStorage.getItem("lp_aiMode") === "true";

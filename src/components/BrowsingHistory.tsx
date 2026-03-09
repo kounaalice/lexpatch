@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { getHistory, clearHistory, type BrowsingHistoryEntry } from "@/lib/history";
 
@@ -30,11 +30,7 @@ function relativeTime(isoString: string): string {
  * Reads from `lp_history` in localStorage.
  */
 export function BrowsingHistory() {
-  const [entries, setEntries] = useState<BrowsingHistoryEntry[]>([]);
-
-  useEffect(() => {
-    setEntries(getHistory().slice(0, 10));
-  }, []);
+  const [entries, setEntries] = useState<BrowsingHistoryEntry[]>(() => getHistory().slice(0, 10));
 
   function handleClear() {
     clearHistory();

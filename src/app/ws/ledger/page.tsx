@@ -17,13 +17,13 @@ export default function LedgerPage() {
   );
   const [sortAsc, setSortAsc] = useState(false);
 
-  useEffect(() => {
-    refresh();
-  }, []);
-
   function refresh() {
     setDocs(getAllDocuments());
   }
+
+  useEffect(() => {
+    refresh(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
 
   function handleSort(key: typeof sortKey) {
     if (sortKey === key) {

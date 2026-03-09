@@ -29,7 +29,7 @@ export function InlineAnnotation({
   useEffect(() => {
     const existing = getAnnotation(lawId, articleTitle, lineIndex);
     if (existing) {
-      setText(existing.text);
+      setText(existing.text); // eslint-disable-line react-hooks/set-state-in-effect
       setHasAnnotation(true);
     } else {
       setText("");

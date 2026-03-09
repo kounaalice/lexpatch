@@ -17,6 +17,7 @@ const TYPE_LABELS: Record<string, { label: string; bg: string; fg: string }> = {
   community: { label: "コミュニティ", bg: "#F5F3FF", fg: "#7C3AED" },
 };
 
+/* eslint-disable react-hooks/error-boundaries -- Server Component; try/catch wraps DB queries */
 export async function NewsFeed() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
 

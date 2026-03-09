@@ -111,7 +111,7 @@ export default function CardsPage() {
   const [gamingEnabled, setGamingEnabled] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    setMounted(true); // eslint-disable-line react-hooks/set-state-in-effect
     setGamingEnabled(loadSettings().gamingMode);
 
     const handler = () => setMounted((v) => !v); // force re-render

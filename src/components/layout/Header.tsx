@@ -35,7 +35,7 @@ export function Header() {
 
   useEffect(() => {
     const s = loadSettings();
-    setCurrentTheme(s.theme);
+    setCurrentTheme(s.theme); // eslint-disable-line react-hooks/set-state-in-effect
     applyTheme(s.theme);
     applyGamingMode(s.gamingMode);
     setGamingMode(s.gamingMode);

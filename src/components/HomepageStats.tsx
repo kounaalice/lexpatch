@@ -78,7 +78,7 @@ export default function HomepageStats() {
 
     // Gaming stats
     const settings = loadSettings();
-    setGamingMode(settings.gamingMode);
+    setGamingMode(settings.gamingMode); // eslint-disable-line react-hooks/set-state-in-effect
     if (settings.gamingMode) {
       setGaming(getGamingStats());
     }

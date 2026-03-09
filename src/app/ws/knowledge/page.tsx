@@ -31,13 +31,6 @@ export default function KnowledgePage() {
     pinned: false,
   });
 
-  useEffect(() => {
-    reload();
-  }, []);
-  useEffect(() => {
-    reload();
-  }, [search, tab, categoryFilter]);
-
   function reload() {
     let list = search
       ? searchArticles(search)
@@ -47,6 +40,13 @@ export default function KnowledgePage() {
     if (categoryFilter) list = list.filter((a) => a.category === categoryFilter);
     setArticles(list);
   }
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [search, tab, categoryFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function openDetail(a: KnowledgeArticle) {
     incrementViewCount(a.id);

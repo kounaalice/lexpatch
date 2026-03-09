@@ -131,8 +131,13 @@ export default function W100FieldPage({ params }: { params: Promise<{ ccCode: st
                   {aspect.code}
                 </span>
                 <div>
-                  <h3 className="font-bold text-sm text-[var(--text-primary)]">{aspect.label}</h3>
-                  <p className="text-xs text-[var(--text-secondary)]">{aspect.description}</p>
+                  <h3 className="font-bold text-sm text-[var(--text-primary)]">
+                    {aspect.code}-{aspect.label}
+                  </h3>
+                  <p className="text-xs text-[var(--text-secondary)]">
+                    -{aspect.code}
+                    {aspect.description}
+                  </p>
                   <p className="text-xs text-[var(--text-secondary)] mt-1 font-mono">
                     例: W{ccCode}.00.{aspect.code}0
                   </p>

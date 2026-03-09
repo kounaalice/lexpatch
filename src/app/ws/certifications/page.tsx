@@ -44,12 +44,12 @@ export default function CertificationsPage() {
     alertDays: 60,
   });
 
-  useEffect(() => {
-    reload();
-  }, []);
-  useEffect(() => {
-    reload();
-  }, [search, statusFilter]);
+  function computeStatus(c: Certification): string {
+    if (!c.expiryDate) return c.status;
+    const today = new Date().toISOString().slice(0, 10);
+    if (c.expiryDate < today) return "expired";
+    return c.status;
+  }
 
   function reload() {
     let list = getAllCertifications();
@@ -68,12 +68,12 @@ export default function CertificationsPage() {
     setExpired(getExpiredCertifications());
   }
 
-  function computeStatus(c: Certification): string {
-    if (!c.expiryDate) return c.status;
-    const today = new Date().toISOString().slice(0, 10);
-    if (c.expiryDate < today) return "expired";
-    return c.status;
-  }
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [search, statusFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function openEdit(c: Certification) {
     setForm({

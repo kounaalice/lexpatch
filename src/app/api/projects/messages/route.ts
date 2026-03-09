@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
     if (project) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const memberNames = ((project.members as any[]) ?? [])
-        .map((m: any) => m.name)
+        .map((m: { name?: string }) => m.name)
         .filter(Boolean);
       if (memberNames.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

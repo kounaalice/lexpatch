@@ -21,6 +21,7 @@ export function FollowButton({ type, id, title }: Props) {
     if (session) {
       isFollowingDB(type, id).then(setFollowing);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFollowing(isFollowing(type, id));
     }
   }, [type, id]);

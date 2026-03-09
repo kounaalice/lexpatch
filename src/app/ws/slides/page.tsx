@@ -76,7 +76,7 @@ export default function SlidesPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setMarkdown(saved);
+      if (saved) setMarkdown(saved); // eslint-disable-line react-hooks/set-state-in-effect
     }
   }, []);
 

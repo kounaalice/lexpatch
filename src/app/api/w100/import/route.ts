@@ -43,8 +43,11 @@ export async function POST(request: NextRequest) {
     };
   });
 
+  // w100_fields table is not in Database type definition
   const { error: fieldErr } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .from("w100_fields" as any)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .upsert(fieldRows as any, { onConflict: "code" });
 
   results.push({
@@ -69,8 +72,11 @@ export async function POST(request: NextRequest) {
         keywords: t.keywords ?? [],
       }));
 
+      // w100_topics table is not in Database type definition
       const { error } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .from("w100_topics" as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .upsert(batch as any, { onConflict: "field_code,code" });
 
       if (error) {

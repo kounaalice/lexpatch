@@ -15,7 +15,7 @@ export default function PrecedentList({ lawId, articleNum }: Props) {
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
+    setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
     fetch(
       `/api/precedents?lawId=${encodeURIComponent(lawId)}&article=${encodeURIComponent(articleNum)}`,
     )

@@ -101,13 +101,6 @@ export default function RegulationsPage() {
     null,
   );
 
-  useEffect(() => {
-    reload();
-  }, []);
-  useEffect(() => {
-    reload();
-  }, [search, categoryFilter]);
-
   function reload() {
     let list = getAllRegulations();
     if (search) {
@@ -119,6 +112,13 @@ export default function RegulationsPage() {
     if (categoryFilter) list = list.filter((r) => r.category === categoryFilter);
     setRegulations(list);
   }
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [search, categoryFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function openEdit(r: Regulation) {
     setForm({

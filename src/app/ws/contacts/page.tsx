@@ -74,17 +74,17 @@ export default function ContactsPage() {
   const [linkRefId, setLinkRefId] = useState("");
   const [linkRefTitle, setLinkRefTitle] = useState("");
 
-  useEffect(() => {
-    reload();
-  }, []);
-
   function reload() {
     setContacts(search ? searchContacts(search) : getAllContacts());
   }
 
   useEffect(() => {
-    reload();
-  }, [search]);
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function openDetail(c: Contact) {
     setSelectedId(c.id);

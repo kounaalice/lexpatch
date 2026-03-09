@@ -41,13 +41,6 @@ export default function ContractsPage() {
     alertDays: 30,
   });
 
-  useEffect(() => {
-    reload();
-  }, []);
-  useEffect(() => {
-    reload();
-  }, [search, statusFilter]);
-
   function reload() {
     let list = getAllContracts();
     if (search) {
@@ -60,6 +53,13 @@ export default function ContractsPage() {
     setContracts(list);
     setExpiring(getExpiringContracts(30));
   }
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [search, statusFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function openEdit(c: Contract) {
     setForm({

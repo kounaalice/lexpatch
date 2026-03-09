@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 
 export default function LawError({ error, reset }: { error: Error; reset: () => void }) {
-  const [isOffline, setIsOffline] = useState(false);
+  const [isOffline, setIsOffline] = useState(() =>
+    typeof navigator !== "undefined" ? !navigator.onLine : false,
+  );
   const [waitingOnline, setWaitingOnline] = useState(false);
 
   useEffect(() => {
     const update = () => setIsOffline(!navigator.onLine);
-    update();
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
     return () => {
@@ -35,7 +36,7 @@ export default function LawError({ error, reset }: { error: Error; reset: () => 
   // オンライン復帰時に自動リトライ
   useEffect(() => {
     if (!isOffline && waitingOnline) {
-      setWaitingOnline(false);
+      setWaitingOnline(false); // eslint-disable-line react-hooks/set-state-in-effect
       reset();
     }
   }, [isOffline, waitingOnline, reset]);

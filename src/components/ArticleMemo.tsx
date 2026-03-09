@@ -58,7 +58,7 @@ export function ArticleMemo({ lawId, lawTitle, articleTitle, embedded }: Props) 
   // Load memo on mount
   useEffect(() => {
     const stored = loadMemo(key);
-    setText(stored);
+    setText(stored); // eslint-disable-line react-hooks/set-state-in-effect
     // Auto-open if there is already a memo
     if (stored.trim() !== "") {
       setOpen(true);

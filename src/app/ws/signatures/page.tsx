@@ -25,12 +25,13 @@ export default function SignaturesPage() {
   const [paths, setPaths] = useState<Array<{ x: number; y: number }[]>>([]);
   const [currentPath, setCurrentPath] = useState<{ x: number; y: number }[]>([]);
 
-  useEffect(() => {
-    reload();
-  }, []);
   function reload() {
     setSignatures(getAllSignatures());
   }
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
 
   function handleCreateText() {
     if (!textForm.name.trim() || !textForm.textValue.trim()) return;
@@ -474,6 +475,7 @@ export default function SignaturesPage() {
                   {sig.textValue}
                 </span>
               ) : sig.dataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- data URL署名プレビュー
                 <img src={sig.dataUrl} alt={sig.name} style={{ maxHeight: 80, maxWidth: "100%" }} />
               ) : null}
             </div>

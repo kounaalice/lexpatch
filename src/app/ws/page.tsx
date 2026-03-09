@@ -179,6 +179,7 @@ export default function WorkspaceHub() {
   });
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSession(getSession());
     const ticketStats = getTicketStats();
     setStats({

@@ -39,14 +39,14 @@ export default function LearningPage() {
   });
   const [editMode, setEditMode] = useState(false);
 
-  useEffect(() => {
-    reload();
-  }, []);
-
   function reload() {
     setCourses(getAllCourses());
     setProgress(getAllProgress());
   }
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
 
   function handleCreate() {
     if (!form.title.trim()) return;

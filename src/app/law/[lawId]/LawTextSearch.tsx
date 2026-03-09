@@ -199,7 +199,7 @@ export default function LawTextSearch({
   function renderText(text: string) {
     if (!keyword) return text;
     const { nodes, matchCount } = highlightSegments(text, keyword, globalMatchIdx, currentMatch);
-    globalMatchIdx += matchCount;
+    globalMatchIdx += matchCount; // eslint-disable-line react-hooks/immutability
     return <>{nodes}</>;
   }
 

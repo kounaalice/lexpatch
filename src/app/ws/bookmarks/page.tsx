@@ -26,18 +26,18 @@ export default function BookmarksPage() {
     pinned: false,
   });
 
-  useEffect(() => {
-    reload();
-  }, []);
-  useEffect(() => {
-    reload();
-  }, [search, categoryFilter]);
-
   function reload() {
     let list = search ? searchBookmarks(search) : getAllBookmarks();
     if (categoryFilter) list = list.filter((b) => b.category === categoryFilter);
     setBookmarks(list);
   }
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [search, categoryFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function openEdit(b: WsBookmark) {
     setForm({

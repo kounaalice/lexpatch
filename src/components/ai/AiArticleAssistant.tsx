@@ -27,7 +27,7 @@ export default function AiArticleAssistant({
   useEffect(() => {
     const userAi = localStorage.getItem("lp_aiMode") === "true";
     if (!userAi) {
-      setEnabled(false);
+      setEnabled(false); // eslint-disable-line react-hooks/set-state-in-effect
       return;
     }
     fetch("/api/ai/status")

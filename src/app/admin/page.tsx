@@ -84,7 +84,7 @@ export default function AdminPage() {
         setLoading(false);
       }
     },
-    [session?.token, analyticsDays],
+    [session?.memberId, session?.token, analyticsDays],
   );
 
   useEffect(() => {

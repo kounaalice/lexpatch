@@ -1,20 +1,14 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { getHistory, type BrowsingHistoryEntry } from "@/lib/history";
 import { getFollows, type FollowEntry } from "@/lib/follows";
 import { getBookmarks, type Bookmark } from "@/lib/bookmarks";
 
 export default function StatsPage() {
-  const [history, setHistory] = useState<BrowsingHistoryEntry[]>([]);
-  const [follows, setFollows] = useState<FollowEntry[]>([]);
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
-
-  useEffect(() => {
-    setHistory(getHistory());
-    setFollows(getFollows());
-    setBookmarks(getBookmarks());
-  }, []);
+  const [history] = useState<BrowsingHistoryEntry[]>(() => getHistory());
+  const [follows] = useState<FollowEntry[]>(() => getFollows());
+  const [bookmarks] = useState<Bookmark[]>(() => getBookmarks());
 
   const totalViewed = history.length;
   const totalFollows = follows.length;
@@ -70,7 +64,10 @@ export default function StatsPage() {
     1,
     categoryData.reduce((a, c) => a + c.count, 0),
   );
-  const pieColors = ["#0369A1", "#059669", "#D97706", "#DC2626", "#7C3AED", "#DB2777"];
+  const pieColors = useMemo(
+    () => ["#0369A1", "#059669", "#D97706", "#DC2626", "#7C3AED", "#DB2777"],
+    [],
+  );
 
   // Build pie segments
   const pieSegments = useMemo(() => {
@@ -96,7 +93,7 @@ export default function StatsPage() {
       cumAngle = endAngle;
     });
     return segments;
-  }, [categoryData, totalCat]);
+  }, [categoryData, totalCat, pieColors]);
 
   function describeArc(
     cx: number,

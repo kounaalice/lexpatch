@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getSession } from "@/lib/session";
+import { getSession, type Session } from "@/lib/session";
 
 interface Bulletin {
   id: string;
@@ -27,18 +27,7 @@ export default function BulletinPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", content: "", category: "general", pinned: false });
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [session, setSession] = useState<any>(null);
-
-  useEffect(() => {
-    const s = getSession();
-    setSession(s);
-    fetchBulletins(s?.memberId);
-  }, []);
-
-  function authHeader(): Record<string, string> {
-    if (!session) return {};
-    return { Authorization: `Bearer ${session.memberId}:${session.token}` };
-  }
+  const [session, setSession] = useState<Session | null>(null);
 
   async function fetchBulletins(memberId?: string) {
     const url = memberId ? `/api/ws/bulletin?member_id=${memberId}` : "/api/ws/bulletin";
@@ -48,6 +37,17 @@ export default function BulletinPage() {
       setBulletins(d.bulletins || []);
     }
   }
+
+  function authHeader(): Record<string, string> {
+    if (!session) return {};
+    return { Authorization: `Bearer ${session.memberId}:${session.token}` };
+  }
+
+  useEffect(() => {
+    const s = getSession();
+    setSession(s); // eslint-disable-line react-hooks/set-state-in-effect
+    fetchBulletins(s?.memberId);
+  }, []);
 
   async function handlePost() {
     if (!form.title.trim()) return;

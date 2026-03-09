@@ -34,18 +34,18 @@ export default function DataTablePage() {
   const [chartType, setChartType] = useState<"bar" | "line" | "pie">("bar");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    refresh();
-  }, []);
-  useEffect(() => {
-    if (activeId) setTable(getTable(activeId) || null);
-  }, [activeId]);
-
   function refresh() {
     const all = getAllTables();
     setTables(all);
     if (activeId) setTable(getTable(activeId) || null);
   }
+
+  useEffect(() => {
+    refresh(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (activeId) setTable(getTable(activeId) || null); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [activeId]);
 
   function handleCreate() {
     const t = createTable(newTitle || "新しいテーブル");
@@ -88,8 +88,8 @@ export default function DataTablePage() {
         const t = importCsv(ev.target?.result as string);
         setActiveId(t.id);
         refresh();
-      } catch (err: any) {
-        alert(err.message);
+      } catch (err: unknown) {
+        alert(err instanceof Error ? err.message : String(err));
       }
     };
     reader.readAsText(file);

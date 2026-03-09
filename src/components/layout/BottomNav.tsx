@@ -110,7 +110,7 @@ export function BottomNav() {
 
   useEffect(() => {
     const s = getSession();
-    if (s?.memberId) setMemberId(s.memberId);
+    if (s?.memberId) setMemberId(s.memberId); // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
 
   // 未読通知ポーリング

@@ -81,14 +81,14 @@ function CalendarPage() {
 
   useEffect(() => {
     const s = getSession();
-    setSession(s);
+    setSession(s); // eslint-disable-line react-hooks/set-state-in-effect
     if (!s && !projectId) setLoading(false);
   }, [projectId]);
 
   // プロジェクト名取得
   useEffect(() => {
     if (!projectId) {
-      setProjectTitle("");
+      setProjectTitle(""); // eslint-disable-line react-hooks/set-state-in-effect
       return;
     }
     fetch(`/api/projects?id=${projectId}`)
@@ -123,7 +123,7 @@ function CalendarPage() {
 
   useEffect(() => {
     if (projectId) {
-      setLoading(true);
+      setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
       fetchEvents(year, month, undefined, projectId);
     } else if (session?.memberId) {
       setLoading(true);

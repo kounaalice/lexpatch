@@ -1,19 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { getSession, type Session } from "@/lib/session";
 import OnboardingWizard from "./OnboardingWizard";
 
 export default function OnboardingPage() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const s = getSession();
-    setSession(s);
-    setLoading(false);
-  }, []);
+  const [session] = useState<Session | null>(() => getSession());
+  const [loading] = useState(false);
 
   if (loading) {
     return (

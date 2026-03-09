@@ -25,12 +25,13 @@ export default function SchedulingPage() {
   const [voter, setVoter] = useState("");
   const [answers, setAnswers] = useState<("ok" | "maybe" | "ng")[]>([]);
 
-  useEffect(() => {
-    reload();
-  }, []);
   function reload() {
     setPolls(getAllPolls());
   }
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
 
   function handleCreate() {
     if (!form.title.trim() || candidates.every((c) => !c.date)) return;

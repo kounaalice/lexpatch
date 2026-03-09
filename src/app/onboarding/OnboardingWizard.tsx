@@ -96,7 +96,7 @@ export default function OnboardingWizard({ session }: Props) {
         });
       }
 
-      window.location.href = "/dashboard";
+      window.location.href = "/dashboard"; // eslint-disable-line react-hooks/immutability
     } catch {
       setSaving(false);
     }

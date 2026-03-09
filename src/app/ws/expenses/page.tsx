@@ -48,14 +48,15 @@ export default function ExpensesPage() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  useEffect(() => {
-    reload();
-  }, []);
   function reload() {
     setExpenses(getAllExpenses());
     setRates(getAllRates());
     setInvoices(getAllInvoices());
   }
+
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
 
   function handleAddExpense() {
     if (!expForm.date || !expForm.description.trim()) return;

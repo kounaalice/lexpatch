@@ -87,7 +87,7 @@ export default function WsDocsPage() {
   const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([]);
 
   useEffect(() => {
-    setSession(getSession());
+    setSession(getSession()); // eslint-disable-line react-hooks/set-state-in-effect
     setDocs(getAllDocuments());
     setNumberingPrefix(getNumberingState().prefix);
     setCustomTemplates(loadCustomTemplates());

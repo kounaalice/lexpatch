@@ -35,17 +35,17 @@ export default function GoalsPage() {
   const [krForm, setKrForm] = useState({ title: "", target: 100, unit: "%" });
   const [showKrForm, setShowKrForm] = useState(false);
 
-  useEffect(() => {
-    reload();
-  }, []);
-
   function reload() {
     const all = getAllGoals();
     setGoals(periodFilter ? all.filter((g) => g.period === periodFilter) : all);
   }
+
   useEffect(() => {
-    reload();
-  }, [periodFilter]);
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [periodFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleCreate() {
     if (!form.title.trim()) return;

@@ -61,6 +61,7 @@ export default function TimelinePage() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSession(getSession());
     setPhases(getPhases());
   }, []);

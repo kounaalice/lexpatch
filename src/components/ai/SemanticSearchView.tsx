@@ -161,6 +161,7 @@ export default function SemanticSearchView({
           setTimeout(() => setSimilarMessage(null), 4000);
         }
       } catch (e) {
+        // eslint-disable-next-line no-console -- クライアントサイドエラー報告
         console.error("[FindSimilar] error:", e);
         setSimilarMessage({ text: "類似検索の実行に失敗しました", type: "error" });
         setTimeout(() => setSimilarMessage(null), 5000);

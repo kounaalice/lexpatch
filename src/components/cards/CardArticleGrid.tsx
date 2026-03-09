@@ -46,7 +46,7 @@ export default function CardArticleGrid({
 
   useEffect(() => {
     const settings = loadSettings();
-    setGamingMode(settings.gamingMode);
+    setGamingMode(settings.gamingMode); // eslint-disable-line react-hooks/set-state-in-effect
     setPoints(getPoints());
     setCollectionRate(getLawCollectionRate(lawId, articles.length));
     // 法令名を永続キャッシュに保存（カード図鑑で使用）
@@ -62,7 +62,7 @@ export default function CardArticleGrid({
         setCollectionRate(getLawCollectionRate(lawId, articles.length));
       }
     }
-  }, [lawId, articles]);
+  }, [lawId, articles, lawTitle]);
 
   // ポイント変化を監視
   useEffect(() => {

@@ -37,8 +37,18 @@ export async function GET(request: NextRequest) {
     joinedIds = new Set((memberships ?? []).map((m: { community_id: string }) => m.community_id));
   }
 
-  const result = (communities ?? [])
-    .map((c: any) => ({
+  interface CommunityRow {
+    id: string;
+    name: string;
+    description: string | null;
+    visibility: string;
+    owner_member_id: string;
+    community_members?: { count: number }[];
+    created_at: string;
+    updated_at: string;
+  }
+  const result = ((communities ?? []) as CommunityRow[])
+    .map((c) => ({
       id: c.id,
       name: c.name,
       description: c.description,

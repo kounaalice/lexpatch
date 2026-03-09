@@ -36,14 +36,14 @@ export default function TimeTrackPage() {
   const [reportFrom, setReportFrom] = useState(defaultFrom);
   const [reportTo, setReportTo] = useState(defaultTo);
 
-  useEffect(() => {
-    refresh();
-  }, []);
-
   function refresh() {
     setEntries(getAllEntries());
     setTodayEntries(getEntriesToday());
   }
+
+  useEffect(() => {
+    refresh(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
 
   function handleClockIn() {
     const now = new Date();

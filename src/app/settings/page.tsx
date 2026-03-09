@@ -26,7 +26,7 @@ export default function SettingsPage() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setSettings(loadSettings());
+    setSettings(loadSettings()); // eslint-disable-line react-hooks/set-state-in-effect
     setLoaded(true);
   }, []);
 
@@ -58,11 +58,6 @@ export default function SettingsPage() {
   });
   const [confirmTarget, setConfirmTarget] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!loaded) return;
-    refreshDataCounts();
-  }, [loaded]);
-
   function refreshDataCounts() {
     const history = getHistory().length;
     const bookmarks = getBookmarks().length;
@@ -75,6 +70,11 @@ export default function SettingsPage() {
     }
     setDataCounts({ history, bookmarks, memos, annotations });
   }
+
+  useEffect(() => {
+    if (!loaded) return;
+    refreshDataCounts(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [loaded]);
 
   function clearDataType(type: string) {
     if (type === "history") {

@@ -39,9 +39,8 @@ jobs:
       - name: Test
         run: npx vitest run
 
-      - name: Test coverage
+      - name: Test coverage (lines≥60%, branches≥50%)
         run: npx vitest run --coverage
-        continue-on-error: true # カバレッジ閾値未達でも CI は通す（段階的に厳格化）
 
   security:
     name: Security Audit

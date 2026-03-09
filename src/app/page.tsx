@@ -798,7 +798,7 @@ function NewsFeedSection() {
       .then((r) => r.json())
       .then((data) => setItems(data))
       .catch(() => {});
-    setFollowedProjects(getFollowedIds("project"));
+    setFollowedProjects(getFollowedIds("project")); // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
 
   if (items.length === 0) return null;
@@ -895,7 +895,7 @@ function RecentHistory() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   useEffect(() => {
-    setHistory(getRecentLaws());
+    setHistory(getRecentLaws()); // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
 
   if (history.length === 0) return null;

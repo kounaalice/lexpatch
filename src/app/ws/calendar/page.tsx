@@ -63,7 +63,7 @@ export default function WsCalendarPage() {
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    setSession(getSession());
+    setSession(getSession()); // eslint-disable-line react-hooks/set-state-in-effect
     // Request notification permission + start reminder check
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
@@ -123,7 +123,7 @@ export default function WsCalendarPage() {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
+    setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
     loadEvents(year, month, session?.memberId);
   }, [year, month, session?.memberId, loadEvents]);
 

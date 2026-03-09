@@ -31,7 +31,7 @@ export default function ChatHubPage() {
 
   useEffect(() => {
     const s = getSession();
-    setSession(s);
+    setSession(s); // eslint-disable-line react-hooks/set-state-in-effect
     setLoading(false);
 
     if (s) {

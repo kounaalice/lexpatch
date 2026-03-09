@@ -1,5 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
-import { auditLog, extractActor } from "./audit-log";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { logger } from "./logger";
 
 vi.mock("./logger", () => ({
@@ -11,7 +10,27 @@ vi.mock("./logger", () => ({
   },
 }));
 
+// Supabase admin client のモック
+const mockInsert = vi.fn();
+const mockFrom = vi.fn(() => ({ insert: mockInsert }));
+
+vi.mock("./supabase/server", () => ({
+  createAdminClient: vi.fn(() => ({
+    from: mockFrom,
+  })),
+  createClient: vi.fn(),
+}));
+
+// audit-log モジュールは Supabase モックの後にインポート
+import { auditLog, extractActor } from "./audit-log";
+import { createAdminClient } from "./supabase/server";
+
 describe("auditLog", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockInsert.mockResolvedValue({ error: null });
+  });
+
   it("正しい構造でログを出力する", () => {
     auditLog(
       "auth.login",
@@ -71,6 +90,133 @@ describe("auditLog", () => {
         timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
       }),
     );
+  });
+
+  it("Supabaseにaudit_logsをinsertする", async () => {
+    auditLog(
+      "patch.create",
+      { id: "user-1", name: "作成者", role: "admin", ip: "127.0.0.1" },
+      { type: "patch", id: "patch-1", name: "テストパッチ" },
+      "success",
+      { law_id: "law-123" },
+    );
+
+    // fire-and-forget なので少し待つ
+    await vi.waitFor(() => {
+      expect(mockFrom).toHaveBeenCalledWith("audit_logs");
+    });
+
+    expect(mockInsert).toHaveBeenCalledWith({
+      action: "patch.create",
+      actor_id: "user-1",
+      actor_name: "作成者",
+      actor_ip: "127.0.0.1",
+      resource_type: "patch",
+      resource_id: "patch-1",
+      detail: {
+        law_id: "law-123",
+        result: "success",
+        resource_name: "テストパッチ",
+        actor_role: "admin",
+      },
+    });
+  });
+
+  it("anonymousユーザーのactor_idはnullになる", async () => {
+    auditLog(
+      "auth.login",
+      { id: "anonymous", ip: "10.0.0.1" },
+      { type: "session", id: "n/a" },
+      "failure",
+    );
+
+    await vi.waitFor(() => {
+      expect(mockInsert).toHaveBeenCalled();
+    });
+
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actor_id: null,
+      }),
+    );
+  });
+
+  it("Supabase insertエラー時は警告ログを出力し例外を投げない", async () => {
+    mockInsert.mockResolvedValue({
+      error: { message: "connection refused", code: "PGRST301" },
+    });
+
+    // 例外が投げられないことを確認
+    expect(() => {
+      auditLog("auth.login", { id: "user-1", ip: "127.0.0.1" }, { type: "session", id: "s-1" });
+    }).not.toThrow();
+
+    await vi.waitFor(() => {
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Audit log persistence failed",
+        expect.objectContaining({
+          error: "connection refused",
+          code: "PGRST301",
+        }),
+      );
+    });
+  });
+
+  it("Supabaseクライアント初期化失敗時も例外を投げない", async () => {
+    vi.mocked(createAdminClient).mockImplementationOnce(() => {
+      throw new Error("missing env var");
+    });
+
+    expect(() => {
+      auditLog("auth.login", { id: "user-1", ip: "127.0.0.1" }, { type: "session", id: "s-1" });
+    }).not.toThrow();
+
+    await vi.waitFor(() => {
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Audit log persistence error",
+        expect.objectContaining({
+          error: "missing env var",
+        }),
+      );
+    });
+  });
+
+  it("detailなしでもSupabase insertが正常に動作する", async () => {
+    auditLog("auth.logout", { id: "user-1", ip: "127.0.0.1" }, { type: "session", id: "s-1" });
+
+    await vi.waitFor(() => {
+      expect(mockInsert).toHaveBeenCalled();
+    });
+
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        detail: expect.objectContaining({
+          result: "success",
+        }),
+      }),
+    );
+  });
+
+  it("resource.nameがない場合はdetailにresource_nameが含まれない", async () => {
+    auditLog("auth.login", { id: "user-1", ip: "127.0.0.1" }, { type: "session", id: "s-1" });
+
+    await vi.waitFor(() => {
+      expect(mockInsert).toHaveBeenCalled();
+    });
+
+    const insertedRow = mockInsert.mock.calls[0][0];
+    expect(insertedRow.detail).not.toHaveProperty("resource_name");
+  });
+
+  it("actor.roleがない場合はdetailにactor_roleが含まれない", async () => {
+    auditLog("auth.login", { id: "user-1", ip: "127.0.0.1" }, { type: "session", id: "s-1" });
+
+    await vi.waitFor(() => {
+      expect(mockInsert).toHaveBeenCalled();
+    });
+
+    const insertedRow = mockInsert.mock.calls[0][0];
+    expect(insertedRow.detail).not.toHaveProperty("actor_role");
   });
 });
 

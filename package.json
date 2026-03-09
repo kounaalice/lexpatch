@@ -14,6 +14,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
     "test": "vitest run",
+    "test:e2e": "npx playwright test",
     "typecheck": "tsc --noEmit"
   },
   "lint-staged": {
@@ -34,6 +35,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@opennextjs/cloudflare": "^1.17.1",
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

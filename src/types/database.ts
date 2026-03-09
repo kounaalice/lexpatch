@@ -214,6 +214,39 @@ export interface Database {
         > & { id?: string; created_at?: string; updated_at?: string; sources?: Json };
         Update: Partial<Database["public"]["Tables"]["commentaries"]["Insert"]>;
       };
+      audit_logs: {
+        Row: {
+          id: string;
+          action: string;
+          actor_id: string | null;
+          actor_name: string | null;
+          actor_ip: string | null;
+          resource_type: string | null;
+          resource_id: string | null;
+          detail: Json;
+          created_at: string;
+        };
+        Insert: {
+          action: string;
+          actor_id?: string | null;
+          actor_name?: string | null;
+          actor_ip?: string | null;
+          resource_type?: string | null;
+          resource_id?: string | null;
+          detail?: Json;
+          id?: string;
+          created_at?: string;
+        };
+        Update: {
+          action?: string;
+          actor_id?: string | null;
+          actor_name?: string | null;
+          actor_ip?: string | null;
+          resource_type?: string | null;
+          resource_id?: string | null;
+          detail?: Json;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

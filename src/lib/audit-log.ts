@@ -6,10 +6,11 @@
  * 説明責任のために残す。
  *
  * Phase 1: console ログ (Cloudflare Workers のログに残る)
- * Phase 2: Supabase audit_logs テーブルに永続化 (将来)
+ * Phase 2: Supabase audit_logs テーブルに永続化
  */
 
 import { logger } from "./logger";
+import { createAdminClient } from "./supabase/server";
 
 export type AuditAction =
   // 認証
@@ -66,6 +67,48 @@ export interface AuditEntry {
 }
 
 /**
+ * 監査ログをSupabaseに永続化する (fire-and-forget)
+ * エラーが発生しても例外を投げず、警告ログのみ出力する。
+ */
+async function persistToSupabase(entry: AuditEntry): Promise<void> {
+  try {
+    const supabase = createAdminClient();
+
+    const detail: Record<string, unknown> = {
+      ...(entry.detail ?? {}),
+      result: entry.result,
+      ...(entry.resource.name ? { resource_name: entry.resource.name } : {}),
+      ...(entry.actor.role ? { actor_role: entry.actor.role } : {}),
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Database型にRelationshipsが未定義のため
+    const { error } = await (supabase.from("audit_logs") as any).insert({
+      action: entry.action,
+      actor_id: entry.actor.id === "anonymous" ? null : entry.actor.id,
+      actor_name: entry.actor.name ?? null,
+      actor_ip: entry.actor.ip ?? null,
+      resource_type: entry.resource.type,
+      resource_id: entry.resource.id,
+      detail,
+    });
+
+    if (error) {
+      logger.warn("Audit log persistence failed", {
+        error: error.message,
+        code: error.code,
+        action: entry.action,
+      });
+    }
+  } catch (err) {
+    // Supabase クライアント初期化失敗等 — ログだけ出して握りつぶす
+    logger.warn("Audit log persistence error", {
+      error: err instanceof Error ? err.message : String(err),
+      action: entry.action,
+    });
+  }
+}
+
+/**
  * 監査ログを記録する
  */
 export function auditLog(
@@ -86,6 +129,13 @@ export function auditLog(
 
   // Phase 1: 構造化ログとして出力 (CF Workers ログに永続化)
   logger.info(`AUDIT: ${action}`, entry as unknown as Record<string, unknown>);
+
+  // Phase 2: Supabase に fire-and-forget で永続化
+  // await しない — リクエストをブロックしない
+  persistToSupabase(entry).catch(() => {
+    // persistToSupabase 内部で既にエラーハンドリング済み
+    // ここは Promise の unhandled rejection 防止のみ
+  });
 }
 
 /**

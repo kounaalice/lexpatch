@@ -55,9 +55,10 @@ export default defineConfig({
         "src/lib/ministries.ts",
         "src/lib/law-names.ts",
         "src/lib/w100-uu-samples.ts",
-        // UI重いモジュール (ブラウザ環境依存)
+        // UI重いモジュール / ブラウザ環境依存
         "src/lib/gaming.ts",
         "src/lib/cards.ts",
+        "src/lib/web-vitals.ts",
       ],
       thresholds: {
         lines: 60,

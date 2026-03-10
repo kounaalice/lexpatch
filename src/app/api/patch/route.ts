@@ -63,8 +63,7 @@ export async function PATCH(request: NextRequest) {
   const admin = createAdminClient();
 
   // admin クライアントで既存パッチを取得（RLS をバイパス）
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existing, error: fetchErr } = await (admin as any)
+  const { data: existing, error: fetchErr } = await admin
     .from("patches")
     .select("author_id")
     .eq("id", id)
@@ -108,12 +107,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   // admin クライアントで RLS をバイパスして更新
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
-    .from("patches")
-    .update(updates)
-    .eq("id", id)
-    .select();
+  const { data, error } = await admin.from("patches").update(updates).eq("id", id).select();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data?.[0] ?? { ok: true });
 }
@@ -128,8 +122,7 @@ export async function DELETE(request: NextRequest) {
 
   const admin = createAdminClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existing, error: fetchErr } = await (admin as any)
+  const { data: existing, error: fetchErr } = await admin
     .from("patches")
     .select("author_id")
     .eq("id", id)
@@ -146,8 +139,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "削除権限がありません" }, { status: 403 });
     }
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any).from("patches").delete().eq("id", id);
+  const { error } = await admin.from("patches").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

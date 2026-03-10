@@ -23,8 +23,7 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: project, error } = await (admin as any)
+  const { data: project, error } = await admin
     .from("projects")
     .select("visibility, access_password_hash, members")
     .eq("id", body.project_id)

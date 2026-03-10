@@ -14,8 +14,7 @@ export async function GET(request: NextRequest) {
   if (!memberId) return NextResponse.json({ error: "member_id が必要です" }, { status: 400 });
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("member_follows")
     .select("id, target_type, target_id, target_title, created_at")
     .eq("member_id", memberId)
@@ -42,8 +41,7 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any).from("member_follows").upsert(
+  const { error } = await admin.from("member_follows").upsert(
     {
       member_id: body.member_id,
       target_type: body.target_type,
@@ -71,8 +69,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any)
+  const { error } = await admin
     .from("member_follows")
     .delete()
     .eq("member_id", memberId)

@@ -48,8 +48,7 @@ export async function discoverNewLaws(): Promise<{
   newPromulgations: AlertLogEntry[];
   newEnforcements: AlertLogEntry[];
 }> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createAdminClient() as any;
+  const db = createAdminClient();
 
   // e-Gov API — 直近30日の公布法令 + 施行法令
   const [promRes, enfRes] = await Promise.allSettled([
@@ -84,6 +83,7 @@ export async function discoverNewLaws(): Promise<{
         { onConflict: "law_id,alert_type", ignoreDuplicates: true },
       )
       .select()
+      .returns<AlertLogEntry[]>()
       .maybeSingle();
 
     if (data && isRecentlyDiscovered(data.discovered_at)) {
@@ -107,6 +107,7 @@ export async function discoverNewLaws(): Promise<{
         { onConflict: "law_id,alert_type", ignoreDuplicates: true },
       )
       .select()
+      .returns<AlertLogEntry[]>()
       .maybeSingle();
 
     if (data && isRecentlyDiscovered(data.discovered_at)) {
@@ -128,8 +129,7 @@ export async function sendImmediateAlerts(
 ): Promise<number> {
   if (newLaws.length === 0) return 0;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createAdminClient() as any;
+  const db = createAdminClient();
   const prefKey = alertType === "promulgation" ? "law_promulgation" : "law_enforcement";
 
   // メール有効なメンバー取得
@@ -185,8 +185,7 @@ export async function sendImmediateAlerts(
 // ─── 3. 週次ダイジェスト送信 ─────────────────────────────────
 
 export async function sendWeeklyDigests(): Promise<number> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createAdminClient() as any;
+  const db = createAdminClient();
   const now = new Date();
   const jstDay = getJSTDayOfWeek(now);
   const jstHour = getJSTHour(now);
@@ -227,7 +226,8 @@ export async function sendWeeklyDigests(): Promise<number> {
           .select("*")
           .eq("alert_type", type)
           .gt("discovered_at", tracker.last_digest_sent)
-          .order("discovered_at", { ascending: false });
+          .order("discovered_at", { ascending: false })
+          .returns<AlertLogEntry[]>();
 
         if (!pendingLaws || pendingLaws.length === 0) continue;
 

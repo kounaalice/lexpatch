@@ -26,8 +26,7 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (admin as any)
+  const { data: profile } = await admin
     .from("member_profiles")
     .select("id, role")
     .eq("id", memberId)

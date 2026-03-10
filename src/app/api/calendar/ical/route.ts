@@ -25,8 +25,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = createAdminClient() as any;
+    const db = createAdminClient();
 
     // 範囲: 過去30日〜未来365日
     const now = new Date();

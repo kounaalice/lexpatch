@@ -17,8 +17,7 @@ export async function GET(request: NextRequest) {
 
   // 全体カウント
   if (request.nextUrl.searchParams.get("count") === "true") {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { count, error } = await (admin as any)
+    const { count, error } = await admin
       .from("canons")
       .select("id", { count: "exact", head: true });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -34,8 +33,7 @@ export async function GET(request: NextRequest) {
 
   // 特定バージョン取得（articles JSONB 含む）
   if (version) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (admin as any)
+    const { data, error } = await admin
       .from("canons")
       .select("id, law_id, version, articles, released_at")
       .eq("law_id", lawId)
@@ -48,8 +46,7 @@ export async function GET(request: NextRequest) {
   }
 
   // バージョン一覧（articles 除外で軽量）
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("canons")
     .select("id, version, released_at")
     .eq("law_id", lawId)

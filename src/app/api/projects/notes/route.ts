@@ -22,8 +22,7 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("project_notes")
     .insert({
       project_id: body.project_id,
@@ -36,8 +35,7 @@ export async function POST(request: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // プロジェクトの updated_at を更新
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (admin as any)
+  await admin
     .from("projects")
     .update({ updated_at: new Date().toISOString() })
     .eq("id", body.project_id);
@@ -54,8 +52,7 @@ export async function DELETE(request: NextRequest) {
   if (!id) return NextResponse.json({ error: "id が必要です" }, { status: 400 });
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any).from("project_notes").delete().eq("id", id);
+  const { error } = await admin.from("project_notes").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

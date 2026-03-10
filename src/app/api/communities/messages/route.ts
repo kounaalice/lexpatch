@@ -19,8 +19,7 @@ export async function GET(request: NextRequest) {
   if (!communityId) return NextResponse.json({ error: "community_id が必要です" }, { status: 400 });
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("community_messages")
     .select("*, member_profiles(name, org)")
     .eq("community_id", communityId)
@@ -69,8 +68,7 @@ export async function POST(request: NextRequest) {
   const admin = createAdminClient();
 
   // メンバー確認
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: membership } = await (admin as any)
+  const { data: membership } = await admin
     .from("community_members")
     .select("id")
     .eq("community_id", body.community_id)
@@ -81,8 +79,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "コミュニティに参加していません" }, { status: 403 });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("community_messages")
     .insert({
       community_id: body.community_id,
@@ -94,26 +91,26 @@ export async function POST(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const row = data as any;
   const result = {
-    id: data.id,
-    content: data.content,
-    author_name: data.member_profiles?.name ?? "",
-    author_org: data.member_profiles?.org ?? "",
-    created_at: data.created_at,
+    id: row.id,
+    content: row.content,
+    author_name: row.member_profiles?.name ?? "",
+    author_org: row.member_profiles?.org ?? "",
+    created_at: row.created_at,
   };
 
   // ─── コミュニティメッセージ通知メール ───
   try {
     // コミュニティ名とメンバー一覧を取得
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: community } = await (admin as any)
+    const { data: community } = await admin
       .from("communities")
       .select("id, name")
       .eq("id", body.community_id)
       .single();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: memberRows } = await (admin as any)
+    const { data: memberRows } = await admin
       .from("community_members")
       .select("member_id, member_profiles(id, name, email, notification_prefs)")
       .eq("community_id", body.community_id);
@@ -166,8 +163,7 @@ export async function DELETE(request: NextRequest) {
   if (!id) return NextResponse.json({ error: "id が必要です" }, { status: 400 });
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any).from("community_messages").delete().eq("id", id);
+  const { error } = await admin.from("community_messages").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

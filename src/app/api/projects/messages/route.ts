@@ -25,8 +25,7 @@ export async function GET(request: NextRequest) {
   // メンバー限定リクエスト時はメンバー検証
   if (visibility === "member" || visibility === "all") {
     if (viewerName) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: project } = await (admin as any)
+      const { data: project } = await admin
         .from("projects")
         .select("members")
         .eq("id", projectId)
@@ -38,8 +37,7 @@ export async function GET(request: NextRequest) {
       }
       // visibility === "all" で非メンバーの場合は public のみ返す
       if (!isMember && visibility === "all") {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error } = await (admin as any)
+        const { data, error } = await admin
           .from("project_messages")
           .select("*")
           .eq("project_id", projectId)
@@ -54,8 +52,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (admin as any)
+  let query = admin
     .from("project_messages")
     .select("*")
     .eq("project_id", projectId)
@@ -94,8 +91,7 @@ export async function POST(request: NextRequest) {
 
   // メンバー限定メッセージ時はメンバー検証
   if (body.visibility === "member" && body.author_name) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: project } = await (admin as any)
+    const { data: project } = await admin
       .from("projects")
       .select("members")
       .eq("id", body.project_id)
@@ -107,8 +103,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("project_messages")
     .insert({
       project_id: body.project_id,
@@ -123,8 +118,7 @@ export async function POST(request: NextRequest) {
 
   // ─── メッセージ通知メール ───
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: project } = await (admin as any)
+    const { data: project } = await admin
       .from("projects")
       .select("id, title, members")
       .eq("id", body.project_id)
@@ -134,10 +128,9 @@ export async function POST(request: NextRequest) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const memberNames = ((project.members as any[]) ?? [])
         .map((m: { name?: string }) => m.name)
-        .filter(Boolean);
+        .filter((n): n is string => !!n);
       if (memberNames.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: members } = await (admin as any)
+        const { data: members } = await admin
           .from("member_profiles")
           .select("id, name, email, notification_prefs")
           .in("name", memberNames)
@@ -190,8 +183,7 @@ export async function DELETE(request: NextRequest) {
   if (!id) return NextResponse.json({ error: "id が必要です" }, { status: 400 });
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any).from("project_messages").delete().eq("id", id);
+  const { error } = await admin.from("project_messages").delete().eq("id", id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });

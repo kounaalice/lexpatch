@@ -24,8 +24,7 @@ export async function POST(request: NextRequest) {
   // patch_id が指定されている場合はDBから取得
   if (patchId && !plainText) {
     const admin = createAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (admin as any)
+    const { data, error } = await admin
       .from("patches")
       .select("plain_text")
       .eq("id", patchId)
@@ -80,8 +79,7 @@ export async function GET(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("lint_results")
     .select("severity, rule_name, message, target_line, created_at")
     .eq("patch_id", patchId)

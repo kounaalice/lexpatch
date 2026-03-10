@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { verifySessionToken } from "@/lib/crypto";
 import { buildVEvent, buildVCalendar, type VEventInput } from "@/lib/ical";
 import { logger } from "@/lib/logger";
+import type { ProjectTask } from "@/types/database";
 
 /**
  * GET /api/calendar/ical?member_id=UUID&token=TOKEN
@@ -77,8 +78,7 @@ export async function GET(request: NextRequest) {
 
     // ── タスク ──
     for (const proj of projects) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const tasks = (proj.tasks ?? []) as any[];
+      const tasks = (proj.tasks ?? []) as unknown as ProjectTask[];
       for (const task of tasks) {
         if (!task.due || task.due < from || task.due > to) continue;
         const ev: VEventInput = {

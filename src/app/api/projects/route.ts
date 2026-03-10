@@ -4,7 +4,7 @@ import { hashPassword, verifySessionToken } from "@/lib/crypto";
 import { sendTaskAlertEmail } from "@/lib/mail";
 import { mergePrefs, isImmediateEnabled } from "@/lib/notification-prefs";
 import { logger } from "@/lib/logger";
-import type { Database } from "@/types/database";
+import type { Database, ProjectTask } from "@/types/database";
 
 type ProjectRow = Database["public"]["Tables"]["projects"]["Row"];
 
@@ -185,14 +185,12 @@ export async function PATCH(request: NextRequest) {
   // ─── タスク変更時のメール通知 ───
   if (body.tasks !== undefined && oldTasks && data?.[0]) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const newTasks = (body.tasks as any[]) ?? [];
+      const newTasks = (body.tasks as unknown as ProjectTask[]) ?? [];
       const project = data[0];
       const projectTitle = project.title ?? "プロジェクト";
 
       // 新規割当を検知（旧タスクにないID、または assignee が変わったもの）
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const oldMap = new Map(oldTasks.map((t: any) => [t.id, t]));
+      const oldMap = new Map((oldTasks as unknown as ProjectTask[]).map((t) => [t.id, t]));
 
       const alerts: {
         assignee: string;
@@ -201,8 +199,7 @@ export async function PATCH(request: NextRequest) {
         due?: string;
       }[] = [];
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const nt of newTasks as any[]) {
+      for (const nt of newTasks) {
         const old = oldMap.get(nt.id);
         if (!old && nt.assignee) {
           // 新規タスクで担当者あり

@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { sendMessageAlertEmail } from "@/lib/mail";
 import { mergePrefs, isImmediateEnabled, getNotificationEmail } from "@/lib/notification-prefs";
 import { logger } from "@/lib/logger";
+import type { ProjectMember } from "@/types/database";
 
 function isSupabaseConfigured() {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -30,8 +31,9 @@ export async function GET(request: NextRequest) {
         .select("members")
         .eq("id", projectId)
         .single();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const isMember = (project?.members as any[])?.some((m: any) => m.name === viewerName);
+      const isMember = (project?.members as unknown as ProjectMember[])?.some(
+        (m) => m.name === viewerName,
+      );
       if (!isMember && visibility === "member") {
         return NextResponse.json({ error: "メンバーのみ閲覧可能です" }, { status: 403 });
       }
@@ -125,8 +127,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (project) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const memberNames = ((project.members as any[]) ?? [])
+      const memberNames = ((project.members as unknown as ProjectMember[]) ?? [])
         .map((m: { name?: string }) => m.name)
         .filter((n): n is string => !!n);
       if (memberNames.length > 0) {
@@ -139,16 +140,14 @@ export async function POST(request: NextRequest) {
         if (members) {
           const authorName = body.author_name?.trim() || "匿名";
           const promises = members
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .filter((m: any) => {
+            .filter((m) => {
               if (m.name === authorName) return false; // 投稿者自身は除外
-              const prefs = mergePrefs(m.notification_prefs);
+              const prefs = mergePrefs(m.notification_prefs as Record<string, unknown> | null);
               return isImmediateEnabled(prefs, "message_alerts");
             })
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .map((m: any) => {
-              const prefs = mergePrefs(m.notification_prefs);
-              const toEmail = getNotificationEmail(prefs, "message_alerts", m.email);
+            .map((m) => {
+              const prefs = mergePrefs(m.notification_prefs as Record<string, unknown> | null);
+              const toEmail = getNotificationEmail(prefs, "message_alerts", m.email!);
               return sendMessageAlertEmail({
                 to: toEmail,
                 memberName: m.name,

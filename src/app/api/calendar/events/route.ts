@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import type { ProjectTask } from "@/types/database";
 
 /**
  * GET /api/calendar/events?member_id=UUID&from=YYYY-MM-DD&to=YYYY-MM-DD
@@ -69,8 +70,7 @@ export async function GET(request: NextRequest) {
 
     // ── 1. タスクイベント ──
     for (const proj of projects) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const tasks = (proj.tasks ?? []) as any[];
+      const tasks = (proj.tasks ?? []) as unknown as ProjectTask[];
       for (const task of tasks) {
         if (!task.due) continue;
         if (task.due < from || task.due > to) continue;

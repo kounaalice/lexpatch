@@ -21,8 +21,7 @@ export default async function GanttPage({ params }: { params: Promise<{ projectI
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("projects")
     .select("id, title, tasks, phase_deadlines, status")
     .eq("id", projectId)
@@ -39,7 +38,9 @@ export default async function GanttPage({ params }: { params: Promise<{ projectI
     );
   }
 
-  const tasks: ProjectTask[] = Array.isArray(data.tasks) ? data.tasks : [];
+  const tasks: ProjectTask[] = Array.isArray(data.tasks)
+    ? (data.tasks as unknown as ProjectTask[])
+    : [];
   const deadlines =
     typeof data.phase_deadlines === "object" && data.phase_deadlines ? data.phase_deadlines : {};
   const phases = PHASES.map((name) => ({

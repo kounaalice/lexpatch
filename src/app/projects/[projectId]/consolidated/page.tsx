@@ -62,8 +62,7 @@ export default async function ConsolidatedLawPage({
   const supabase = createAdminClient();
 
   // プロジェクト情報を取得
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: project, error: projectError } = await (supabase as any)
+  const { data: project, error: projectError } = await supabase
     .from("projects")
     .select("id, title, law_ids")
     .eq("id", projectId)
@@ -83,8 +82,7 @@ export default async function ConsolidatedLawPage({
   const proj = project as ProjectData;
 
   // 統合法データを取得
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: consolidated } = await (supabase as any)
+  const { data: consolidated } = await supabase
     .from("consolidated_laws")
     .select("*")
     .eq("project_id", projectId)

@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { sendNotificationEmail } from "@/lib/mail";
 import { mergePrefs, isImmediateEnabled, getNotificationEmail } from "@/lib/notification-prefs";
 import { logger } from "@/lib/logger";
-import type { Database } from "@/types/database";
+import type { Database, ProjectMember } from "@/types/database";
 
 type NotificationRow = Database["public"]["Tables"]["notifications"]["Row"];
 
@@ -172,12 +172,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (project) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const memberEntries = (project.members as any[]) ?? [];
-      const projectMemberSet = new Set(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        memberEntries.map((m: any) => `${m.name}___${m.org}`),
-      );
+      const memberEntries = (project.members as unknown as ProjectMember[]) ?? [];
+      const projectMemberSet = new Set(memberEntries.map((m) => `${m.name}___${m.org}`));
 
       // メール通知有効なメンバーを取得
       const { data: emailMembers } = await admin

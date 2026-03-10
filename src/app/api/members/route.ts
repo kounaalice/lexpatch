@@ -11,6 +11,7 @@ import { validateCsrf } from "@/lib/csrf";
 import { sendEmailVerificationEmail } from "@/lib/mail";
 import { validateRequest, registerSchema } from "@/lib/validation";
 import { logger } from "@/lib/logger";
+import type { ProjectMember, ProjectTask } from "@/types/database";
 
 function isSupabaseConfigured() {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -99,20 +100,20 @@ export async function GET(request: NextRequest) {
     .contains("members", [{ name, org }])
     .order("updated_at", { ascending: false });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const projectSummaries = (projects ?? []).map((p: any) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const memberEntry = (p.members as any[])?.find((m: any) => m.name === name && m.org === org);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const assignedTasks = (p.tasks as any[])?.filter((t: any) => t.assignee === name) ?? [];
+  const projectSummaries = (projects ?? []).map((p) => {
+    const memberEntry = (p.members as unknown as ProjectMember[])?.find(
+      (m) => m.name === name && m.org === org,
+    );
+    const assignedTasks =
+      (p.tasks as unknown as ProjectTask[])?.filter((t) => t.assignee === name) ?? [];
     return {
       id: p.id,
       title: p.title,
       status: p.status,
       role: memberEntry?.role ?? "",
-      tasksDone: assignedTasks.filter((t: { done: boolean }) => t.done).length,
+      tasksDone: assignedTasks.filter((t) => t.done).length,
       tasksTotal: assignedTasks.length,
-      tasks: assignedTasks.map((t: { id: string; title: string; done: boolean; due?: string }) => ({
+      tasks: assignedTasks.map((t) => ({
         id: t.id,
         title: t.title,
         done: t.done,

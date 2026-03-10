@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import type { ProjectMember } from "@/types/database";
 
 function isSupabaseConfigured() {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -25,8 +26,7 @@ export async function GET(request: NextRequest) {
 
   const admin = createAdminClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sb = admin as any;
+  const sb = admin;
 
   // 1. ユーザーのプロジェクトを取得（members JSONB に name+org が含まれるもの）
   const { data: allProjects } = await sb
@@ -34,30 +34,32 @@ export async function GET(request: NextRequest) {
     .select("id, title, members")
     .order("updated_at", { ascending: false });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const myProjects = (allProjects || []).filter((p: any) => {
-    const members = p.members || [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return members.some((m: any) => m.name === name && (m.org || "") === org);
+  const myProjects = (allProjects || []).filter((p) => {
+    const members = (p.members || []) as unknown as ProjectMember[];
+    return members.some((m) => m.name === name && (m.org || "") === org);
   });
 
   // 2. ユーザーのコミュニティを取得
   const { data: communityMemberships } = await sb
     .from("community_members")
     .select("community_id, communities(id, name)")
-    .eq("member_id", memberId);
+    .eq("member_id", memberId)
+    .returns<{ community_id: string; communities: { id: string; name: string } | null }[]>();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const myCommunities = (communityMemberships || []).map((cm: any) => ({
+  const myCommunities = (communityMemberships || []).map((cm) => ({
     id: cm.communities?.id || cm.community_id,
     name: cm.communities?.name || "",
   }));
 
   // 3. 各プロジェクトの最新メッセージ（最大5件ずつ、最大10プロジェクト）
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const projectGroups: any[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const proj of myProjects.slice(0, 10) as any[]) {
+  interface MessageGroup {
+    id: string;
+    name: string;
+    type: "project" | "community";
+    messages: unknown[];
+  }
+  const projectGroups: MessageGroup[] = [];
+  for (const proj of myProjects.slice(0, 10)) {
     const { data: msgs } = await sb
       .from("project_messages")
       .select("id, content, author_name, created_at, visibility")
@@ -76,24 +78,29 @@ export async function GET(request: NextRequest) {
   }
 
   // 4. 各コミュニティの最新メッセージ（最大5件ずつ、最大10コミュニティ）
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const communityGroups: any[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const comm of myCommunities.slice(0, 10) as any[]) {
+  const communityGroups: MessageGroup[] = [];
+  for (const comm of myCommunities.slice(0, 10)) {
     const { data: msgs } = await sb
       .from("community_messages")
       .select("id, content, created_at, member_profiles(name)")
       .eq("community_id", comm.id)
       .order("created_at", { ascending: false })
-      .limit(5);
+      .limit(5)
+      .returns<
+        {
+          id: string;
+          content: string;
+          created_at: string;
+          member_profiles: { name: string } | null;
+        }[]
+      >();
 
     if (msgs && msgs.length > 0) {
       communityGroups.push({
         id: comm.id,
         name: comm.name,
         type: "community" as const,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        messages: msgs.reverse().map((m: any) => ({
+        messages: msgs.reverse().map((m) => ({
           id: m.id,
           content: m.content,
           author_name: m.member_profiles?.name ?? "不明",

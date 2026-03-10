@@ -1,6 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Database } from "@/types/database";
+
+type PatchRow = Database["public"]["Tables"]["patches"]["Row"];
+type SourceRow = Database["public"]["Tables"]["sources"]["Row"];
+type PatchWithSources = PatchRow & { sources: SourceRow[] };
 import { PatchActions } from "./PatchActions";
 import { DirectEditDiffView } from "./DirectEditDiffView";
 import { LintPanel } from "./LintPanel";
@@ -30,11 +35,11 @@ export default async function PatchDetailPage({
   }
 
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: patch, error } = await (supabase as any)
+  const { data: patch, error } = await supabase
     .from("patches")
     .select("*, sources(*)")
     .eq("id", patchId)
+    .returns<PatchWithSources[]>()
     .single();
 
   if (error || !patch) notFound();
@@ -275,12 +280,17 @@ export default async function PatchDetailPage({
           )}
 
           {/* パッチ本文: 直接編集パッチは新旧対照表、レガシーは+/-記法 */}
-          {patch.structured?.mode === "direct" &&
-          patch.structured?.original &&
-          patch.structured?.edited ? (
+          {(() => {
+            const struct = patch.structured as {
+              mode?: string;
+              original?: string;
+              edited?: string;
+            } | null;
+            return struct?.mode === "direct" && struct?.original && struct?.edited;
+          })() ? (
             <DirectEditDiffView
-              original={patch.structured.original as string}
-              edited={patch.structured.edited as string}
+              original={(patch.structured as { original?: string }).original as string}
+              edited={(patch.structured as { edited?: string }).edited as string}
             />
           ) : (
             <div
@@ -371,7 +381,11 @@ export default async function PatchDetailPage({
             initialDescription={patch.description ?? ""}
             initialPatchText={patch.plain_text as string}
             initialStatus={patch.status}
-            initialStructured={patch.structured}
+            initialStructured={
+              patch.structured as
+                | { [key: string]: unknown; original?: string; edited?: string; mode?: string }
+                | undefined
+            }
             articleTitle={patch.target_articles?.[0] ?? ""}
           />
 

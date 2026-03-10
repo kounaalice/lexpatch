@@ -3,6 +3,36 @@
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
+// ─── JSONB column helper types ──────────────────────────
+/** projects.members JSONB のエントリ */
+export interface ProjectMember {
+  name: string;
+  org?: string;
+  role?: string;
+}
+
+/** projects.tasks JSONB のエントリ */
+export interface ProjectTask {
+  id: string;
+  title: string;
+  assignee?: string;
+  done?: boolean;
+  due?: string;
+  dueTime?: string;
+  status?: string;
+  category?: string;
+}
+
+/** ws_approvals.steps JSONB のエントリ */
+export interface ApprovalStep {
+  step: number;
+  approver_id: string;
+  approver_name?: string;
+  status: string;
+  comment?: string;
+  acted_at?: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -42,6 +72,7 @@ export interface Database {
           id: string;
           canon_id: string | null;
           law_id: string | null;
+          law_title: string | null;
           title: string;
           description: string | null;
           author_id: string | null;
@@ -55,12 +86,23 @@ export interface Database {
         };
         Insert: Omit<
           Database["public"]["Tables"]["patches"]["Row"],
-          "id" | "created_at" | "updated_at" | "canon_id"
+          | "id"
+          | "created_at"
+          | "updated_at"
+          | "canon_id"
+          | "law_title"
+          | "law_id"
+          | "description"
+          | "author_id"
         > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
-          canon_id?: string;
+          canon_id?: string | null;
+          law_title?: string | null;
+          law_id?: string | null;
+          description?: string | null;
+          author_id?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["patches"]["Insert"]>;
         Relationships: [];
@@ -75,7 +117,10 @@ export interface Database {
           excerpt: string | null;
           sort_order: number;
         };
-        Insert: Omit<Database["public"]["Tables"]["sources"]["Row"], "id"> & { id?: string };
+        Insert: Omit<Database["public"]["Tables"]["sources"]["Row"], "id" | "sort_order"> & {
+          id?: string;
+          sort_order?: number;
+        };
         Update: Partial<Database["public"]["Tables"]["sources"]["Insert"]>;
         Relationships: [];
       };
@@ -211,17 +256,26 @@ export interface Database {
         Row: {
           id: string;
           law_id: string;
+          law_title: string | null;
           article_title: string;
           content: string;
           author_name: string | null;
+          member_id: string | null;
           sources: Json;
           created_at: string;
           updated_at: string;
         };
         Insert: Omit<
           Database["public"]["Tables"]["commentaries"]["Row"],
-          "id" | "created_at" | "updated_at" | "sources"
-        > & { id?: string; created_at?: string; updated_at?: string; sources?: Json };
+          "id" | "created_at" | "updated_at" | "sources" | "law_title" | "member_id"
+        > & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          sources?: Json;
+          law_title?: string | null;
+          member_id?: string | null;
+        };
         Update: Partial<Database["public"]["Tables"]["commentaries"]["Insert"]>;
         Relationships: [];
       };

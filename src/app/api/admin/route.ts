@@ -37,8 +37,7 @@ export async function GET(request: NextRequest) {
 
   const section = request.nextUrl.searchParams.get("section") ?? "stats";
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any;
+  const db = admin;
 
   if (section === "stats") {
     const [members, patches, projects, communities, commentaries, contacts] = await Promise.all([

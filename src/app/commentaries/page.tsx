@@ -33,14 +33,14 @@ export default async function CommentariesPage() {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("commentaries")
     .select("id, law_id, article_title, content, author_name, sources, created_at, updated_at")
     .order("updated_at", { ascending: false })
     .limit(300);
 
-  const commentaries: CommentaryRow[] = error ? [] : (data ?? []);
+  // select で限定したカラムのみ取得するため、ローカル型へキャスト
+  const commentaries: CommentaryRow[] = error ? [] : ((data ?? []) as unknown as CommentaryRow[]);
 
   // law_id でグループ化
   const lawMap = new Map<string, CommentaryRow[]>();

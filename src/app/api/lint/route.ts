@@ -45,8 +45,7 @@ export async function POST(request: NextRequest) {
   // patch_id がある場合はDBに保存
   if (patchId) {
     const admin = createAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = admin as any;
+    const db = admin;
 
     // 既存結果を削除
     await db.from("lint_results").delete().eq("patch_id", patchId);

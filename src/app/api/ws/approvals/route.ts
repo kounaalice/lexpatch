@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { verifySessionToken } from "@/lib/crypto";
-import type { Database } from "@/types/database";
+import type { Database, ApprovalStep, Json } from "@/types/database";
 
 type WsApprovalRow = Database["public"]["Tables"]["ws_approvals"]["Row"];
 
@@ -107,8 +107,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   // approve or reject
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const steps = approval.steps as any[];
+  const steps = approval.steps as unknown as ApprovalStep[];
   const stepIdx = steps.findIndex((s) => s.approver_id === memberId && s.status === "pending");
   if (stepIdx < 0)
     return NextResponse.json({ error: "not your turn or already acted" }, { status: 403 });
@@ -130,7 +129,7 @@ export async function PATCH(req: NextRequest) {
   await db
     .from("ws_approvals")
     .update({
-      steps,
+      steps: steps as unknown as Json,
       current_step: nextStep,
       status: overallStatus,
       updated_at: new Date().toISOString(),

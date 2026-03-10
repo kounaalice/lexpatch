@@ -11,7 +11,6 @@ var CACHE_VERSION = "lexcard-v2";
 var STATIC_CACHE = CACHE_VERSION + "-static";
 var LAW_CACHE = CACHE_VERSION + "-laws";
 var API_CACHE = CACHE_VERSION + "-api";
-var WS_CACHE = CACHE_VERSION + "-ws";
 
 // 主要24法令 — Install 時に事前キャッシュ
 var PRECACHE_LAW_IDS = [
@@ -72,7 +71,7 @@ self.addEventListener("activate", function (event) {
       return Promise.all(
         keys
           .filter(function (key) {
-            return key !== STATIC_CACHE && key !== LAW_CACHE && key !== API_CACHE && key !== WS_CACHE;
+            return key !== STATIC_CACHE && key !== LAW_CACHE && key !== API_CACHE;
           })
           .map(function (key) {
             return caches.delete(key);
@@ -104,24 +103,6 @@ self.addEventListener("fetch", function (event) {
   // 法令ページ: Stale-while-revalidate（即返却 + BG更新）
   if (url.pathname.startsWith("/law/")) {
     event.respondWith(staleWhileRevalidate(request, LAW_CACHE));
-    return;
-  }
-
-  // Workspace pages — network first, cache fallback
-  if (url.pathname.startsWith("/ws")) {
-    event.respondWith(
-      fetch(event.request).then(function(response) {
-        if (response.ok) {
-          var cache = caches.open(WS_CACHE);
-          cache.then(function(c) { c.put(event.request, response.clone()); });
-        }
-        return response;
-      }).catch(function() {
-        return caches.match(event.request).then(function(cached) {
-          return cached || caches.match("/offline");
-        });
-      })
-    );
     return;
   }
 

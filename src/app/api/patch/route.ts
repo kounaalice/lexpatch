@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { parsePatch } from "@/lib/patch/parser";
 import { validateRequest, createPatchSchema } from "@/lib/validation";
+import type { Database, Json } from "@/types/database";
+
+type PatchRow = Database["public"]["Tables"]["patches"]["Row"];
 
 function isSupabaseConfigured() {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -21,8 +24,7 @@ export async function GET(request: NextRequest) {
 
   // 単件取得
   if (id) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from("patches")
       .select("*, sources(*)")
       .eq("id", id)
@@ -35,8 +37,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (supabase as any)
+  let query = supabase
     .from("patches")
     .select(
       "id, title, description, status, patch_type, target_articles, law_id, created_at, author_id",
@@ -63,8 +64,7 @@ export async function PATCH(request: NextRequest) {
   const admin = createAdminClient();
 
   // admin クライアントで既存パッチを取得（RLS をバイパス）
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existing, error: fetchErr } = await (admin as any)
+  const { data: existing, error: fetchErr } = await admin
     .from("patches")
     .select("author_id")
     .eq("id", id)
@@ -108,12 +108,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   // admin クライアントで RLS をバイパスして更新
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
-    .from("patches")
-    .update(updates)
-    .eq("id", id)
-    .select();
+  const { data, error } = await admin.from("patches").update(updates).eq("id", id).select();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data?.[0] ?? { ok: true });
 }
@@ -128,8 +123,7 @@ export async function DELETE(request: NextRequest) {
 
   const admin = createAdminClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existing, error: fetchErr } = await (admin as any)
+  const { data: existing, error: fetchErr } = await admin
     .from("patches")
     .select("author_id")
     .eq("id", id)
@@ -146,8 +140,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "削除権限がありません" }, { status: 403 });
     }
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any).from("patches").delete().eq("id", id);
+  const { error } = await admin.from("patches").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
@@ -195,23 +188,23 @@ export async function POST(request: NextRequest) {
   const structured = extra.structured_override ?? parsePatch(extra.plain_text);
   const patchType = extra.structured_override ? "A" : parsePatch(extra.plain_text).patchType;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("patches")
     .insert({
       title: extra.title,
       plain_text: extra.plain_text,
-      structured: structured,
+      structured: structured as unknown as Json,
       target_articles: extra.target_articles ?? [targetArticle],
       description: description ?? null,
       author_id: user?.id ?? null,
-      patch_type: patchType,
+      patch_type: patchType as "A" | "C",
       status: "下書き",
-      ...(lawId ? { law_id: lawId } : {}),
-      ...(extra.law_title ? { law_title: extra.law_title } : {}),
-      ...(extra.canon_id ? { canon_id: extra.canon_id } : {}),
+      law_id: lawId ?? null,
+      law_title: extra.law_title ?? null,
+      canon_id: extra.canon_id ?? null,
     })
     .select()
+    .returns<PatchRow[]>()
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -222,14 +215,13 @@ export async function POST(request: NextRequest) {
       .filter((s) => s.label?.trim())
       .map((s) => ({
         patch_id: data.id,
-        tier: s.tier,
+        tier: s.tier as "一次" | "準一次" | "二次" | "三次",
         label: s.label,
         url: s.url || null,
         excerpt: s.excerpt || null,
       }));
     if (sourcesData.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (supabase as any).from("sources").insert(sourcesData);
+      await supabase.from("sources").insert(sourcesData);
     }
   }
 

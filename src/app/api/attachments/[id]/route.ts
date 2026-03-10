@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { verifySessionToken } from "@/lib/crypto";
 import { logger } from "@/lib/logger";
+import type { Database } from "@/types/database";
+
+type AttachmentRow = Database["public"]["Tables"]["attachments"]["Row"];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getR2Bucket(): Promise<any> {
@@ -22,12 +25,12 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   const { id } = await params;
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = createAdminClient() as any;
+    const db = createAdminClient();
     const { data: attachment, error } = await db
       .from("attachments")
       .select("*")
       .eq("id", id)
+      .returns<AttachmentRow[]>()
       .single();
 
     if (error || !attachment) {
@@ -81,12 +84,12 @@ export async function DELETE(
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = createAdminClient() as any;
+    const db = createAdminClient();
     const { data: attachment, error } = await db
       .from("attachments")
       .select("*")
       .eq("id", id)
+      .returns<AttachmentRow[]>()
       .single();
 
     if (error || !attachment) {

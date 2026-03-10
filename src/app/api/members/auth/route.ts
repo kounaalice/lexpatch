@@ -54,8 +54,7 @@ export async function POST(request: NextRequest) {
   const admin = createAdminClient();
 
   // Query by email or name+org
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (admin as any)
+  let query = admin
     .from("member_profiles")
     .select("id, name, org, org_type, password_hash, role, auth_provider, avatar_url, email");
 
@@ -97,11 +96,7 @@ export async function POST(request: NextRequest) {
   // Auto-upgrade password hash to PBKDF2 if using legacy SHA-256
   if (needsRehash(data.password_hash)) {
     const newHash = await hashPassword(password);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (admin as any)
-      .from("member_profiles")
-      .update({ password_hash: newHash })
-      .eq("id", data.id);
+    await admin.from("member_profiles").update({ password_hash: newHash }).eq("id", data.id);
   }
 
   const token = await generateSessionToken(data.id);

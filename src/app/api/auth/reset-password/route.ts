@@ -27,8 +27,7 @@ export async function POST(request: NextRequest) {
   });
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: member } = await (admin as any)
+  const { data: member } = await admin
     .from("member_profiles")
     .select("id, name, auth_provider")
     .eq("email", email)
@@ -43,8 +42,7 @@ export async function POST(request: NextRequest) {
   const { raw, hashed } = await generateOneTimeToken();
   const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (admin as any)
+  await admin
     .from("member_profiles")
     .update({
       password_reset_token: hashed,
@@ -78,8 +76,7 @@ export async function PATCH(request: NextRequest) {
   const body = result.data;
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: member } = await (admin as any)
+  const { data: member } = await admin
     .from("member_profiles")
     .select("id, password_reset_token, password_reset_expires")
     .eq("email", body.email.trim().toLowerCase())
@@ -90,7 +87,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   // Check expiry
-  if (new Date(member.password_reset_expires) < new Date()) {
+  if (new Date(member.password_reset_expires!) < new Date()) {
     return NextResponse.json({ error: "リセットリンクの有効期限が切れています" }, { status: 400 });
   }
 
@@ -103,8 +100,7 @@ export async function PATCH(request: NextRequest) {
   // Set new password (PBKDF2)
   const newHash = await hashPassword(body.newPassword);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (admin as any)
+  await admin
     .from("member_profiles")
     .update({
       password_hash: newHash,

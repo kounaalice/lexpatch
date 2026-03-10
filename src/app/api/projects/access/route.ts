@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { verifyPassword } from "@/lib/crypto";
+import type { ProjectMember } from "@/types/database";
 
 function isSupabaseConfigured() {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -23,8 +24,7 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: project, error } = await (admin as any)
+  const { data: project, error } = await admin
     .from("projects")
     .select("visibility, access_password_hash, members")
     .eq("id", body.project_id)
@@ -58,8 +58,9 @@ export async function POST(request: NextRequest) {
     if (!body.viewer_name) {
       return NextResponse.json({ access: false, reason: "ログインが必要です" });
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const isMember = (project.members as any[])?.some((m: any) => m.name === body.viewer_name);
+    const isMember = (project.members as unknown as ProjectMember[])?.some(
+      (m) => m.name === body.viewer_name,
+    );
     if (!isMember) {
       return NextResponse.json({ access: false, reason: "このプロジェクトはメンバー限定です" });
     }

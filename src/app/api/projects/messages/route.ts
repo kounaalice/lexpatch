@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { sendMessageAlertEmail } from "@/lib/mail";
 import { mergePrefs, isImmediateEnabled, getNotificationEmail } from "@/lib/notification-prefs";
 import { logger } from "@/lib/logger";
+import type { ProjectMember } from "@/types/database";
 
 function isSupabaseConfigured() {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -25,21 +26,20 @@ export async function GET(request: NextRequest) {
   // メンバー限定リクエスト時はメンバー検証
   if (visibility === "member" || visibility === "all") {
     if (viewerName) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: project } = await (admin as any)
+      const { data: project } = await admin
         .from("projects")
         .select("members")
         .eq("id", projectId)
         .single();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const isMember = (project?.members as any[])?.some((m: any) => m.name === viewerName);
+      const isMember = (project?.members as unknown as ProjectMember[])?.some(
+        (m) => m.name === viewerName,
+      );
       if (!isMember && visibility === "member") {
         return NextResponse.json({ error: "メンバーのみ閲覧可能です" }, { status: 403 });
       }
       // visibility === "all" で非メンバーの場合は public のみ返す
       if (!isMember && visibility === "all") {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error } = await (admin as any)
+        const { data, error } = await admin
           .from("project_messages")
           .select("*")
           .eq("project_id", projectId)
@@ -54,8 +54,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (admin as any)
+  let query = admin
     .from("project_messages")
     .select("*")
     .eq("project_id", projectId)
@@ -94,8 +93,7 @@ export async function POST(request: NextRequest) {
 
   // メンバー限定メッセージ時はメンバー検証
   if (body.visibility === "member" && body.author_name) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: project } = await (admin as any)
+    const { data: project } = await admin
       .from("projects")
       .select("members")
       .eq("id", body.project_id)
@@ -107,8 +105,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("project_messages")
     .insert({
       project_id: body.project_id,
@@ -123,21 +120,18 @@ export async function POST(request: NextRequest) {
 
   // ─── メッセージ通知メール ───
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: project } = await (admin as any)
+    const { data: project } = await admin
       .from("projects")
       .select("id, title, members")
       .eq("id", body.project_id)
       .single();
 
     if (project) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const memberNames = ((project.members as any[]) ?? [])
+      const memberNames = ((project.members as unknown as ProjectMember[]) ?? [])
         .map((m: { name?: string }) => m.name)
-        .filter(Boolean);
+        .filter((n): n is string => !!n);
       if (memberNames.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: members } = await (admin as any)
+        const { data: members } = await admin
           .from("member_profiles")
           .select("id, name, email, notification_prefs")
           .in("name", memberNames)
@@ -146,16 +140,14 @@ export async function POST(request: NextRequest) {
         if (members) {
           const authorName = body.author_name?.trim() || "匿名";
           const promises = members
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .filter((m: any) => {
+            .filter((m) => {
               if (m.name === authorName) return false; // 投稿者自身は除外
-              const prefs = mergePrefs(m.notification_prefs);
+              const prefs = mergePrefs(m.notification_prefs as Record<string, unknown> | null);
               return isImmediateEnabled(prefs, "message_alerts");
             })
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .map((m: any) => {
-              const prefs = mergePrefs(m.notification_prefs);
-              const toEmail = getNotificationEmail(prefs, "message_alerts", m.email);
+            .map((m) => {
+              const prefs = mergePrefs(m.notification_prefs as Record<string, unknown> | null);
+              const toEmail = getNotificationEmail(prefs, "message_alerts", m.email!);
               return sendMessageAlertEmail({
                 to: toEmail,
                 memberName: m.name,
@@ -190,8 +182,7 @@ export async function DELETE(request: NextRequest) {
   if (!id) return NextResponse.json({ error: "id が必要です" }, { status: 400 });
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any).from("project_messages").delete().eq("id", id);
+  const { error } = await admin.from("project_messages").delete().eq("id", id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });

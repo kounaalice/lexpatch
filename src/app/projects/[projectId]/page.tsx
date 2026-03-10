@@ -82,8 +82,7 @@ export default async function ProjectDetailPage({
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sb = admin as any;
+  const sb = admin;
   const { data, error } = await sb
     .from("projects")
     .select("*, project_notes(*)")
@@ -98,7 +97,8 @@ export default async function ProjectDetailPage({
       .select("*")
       .eq("project_id", projectId)
       .order("meeting_date", { ascending: false });
-    if (Array.isArray(mmData)) meetingMinutesRaw = mmData;
+    if (Array.isArray(mmData))
+      meetingMinutesRaw = mmData as unknown as ProjectData["meeting_minutes"];
   } catch {
     /* table may not exist yet */
   }

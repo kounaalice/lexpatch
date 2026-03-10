@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "LexCardとは",
   description:
-    "LexCard（法令アクセス支援システム）は、法令の検索・閲覧から改正案の作成・チーム管理・条文カードゲームまで。HIME Systems（こうな姫株式会社）が公共目的で無償提供する法令アクセス基盤です。",
+    "LexCard（法令アクセス支援システム）は、法令の検索・閲覧から改正案の作成・逐条解説・AI法令検索まで。HIME Systems（こうな姫株式会社）が公共目的で無償提供する法令アクセス基盤です。",
 };
 
 export default function AboutPage() {
@@ -47,7 +47,7 @@ export default function AboutPage() {
           >
             LexCard（法令アクセス支援システム）は、HIME
             Systems（こうな姫株式会社）が公共目的で無償提供する法令アクセス基盤です。
-            法令の検索・閲覧から改正案の作成・チーム管理・条文カードゲームまで。すべて無料・登録不要で提供しています。
+            法令の検索・閲覧から改正案の作成・逐条解説・AI法令検索まで。すべて無料・登録不要で提供しています。
           </p>
         </div>
 
@@ -68,15 +68,15 @@ export default function AboutPage() {
                 color: "#0369A1",
               },
               {
-                icon: "\uD83C\uDFDB\uFE0F",
-                title: "法令ワークスペース",
-                desc: "プロジェクト管理・コミュニティ・改正案作成・チームカレンダー・ファイル共有。法令業務をチームで進めるための統合環境。",
+                icon: "✏️",
+                title: "改正案エディタ",
+                desc: "条文テキストを直接書き換えて改正案を作成。新旧対照表・改め文を自動生成。Lint検証で形式チェックも。",
                 color: "#0284C7",
               },
               {
-                icon: "\uD83C\uDFAE",
-                title: "条文カードゲーム",
-                desc: "全法令の全条文がTCGカードに。ガチャ・収集・レベルアップ。法令を読みながら遊べる、完全無料のブラウザカードゲーム。",
+                icon: "\uD83E\uDD16",
+                title: "AI法令検索",
+                desc: "36,000超の条文をベクトル検索。法令に関するQ&A・要約・推薦をAIが支援。マルチモデル対応。",
                 color: "#7C3AED",
               },
             ].map(({ icon, title, desc, color }) => (
@@ -171,7 +171,7 @@ export default function AboutPage() {
                 },
                 {
                   label: "寄付・協力による運営",
-                  desc: "本事業の収入は寄付およびプロジェクト支援協力金に限り、サーバー・開発環境・セキュリティ等の維持改善に再投資します。",
+                  desc: "本事業の収入は寄付に限り、サーバー・開発環境・セキュリティ等の維持改善に再投資します。",
                 },
                 {
                   label: "オープンソース",
@@ -232,9 +232,9 @@ export default function AboutPage() {
                 desc: "デジタル庁のe-Gov法令検索APIから最新の法令データを直接取得。50分野 + 47都道府県の法令カテゴリに対応。",
               },
               {
-                icon: "🏛️",
-                title: "プロジェクト管理",
-                desc: "法令の調査・検討をまとめるワークスペース。タスク管理、チャット、参考資料の一元管理が可能です。",
+                icon: "📖",
+                title: "逐条解説",
+                desc: "各条文に対してメンバーが解説を投稿・閲覧。出典付きで法令の趣旨や判例の解説を共有できます。",
               },
               {
                 icon: "🔎",
@@ -242,9 +242,9 @@ export default function AboutPage() {
                 desc: "改正案の形式チェックを自動実行。対象条文・項番号の連番・追加削除バランスなど6種のルールで検証します。",
               },
               {
-                icon: "💬",
-                title: "コミュニティチャット",
-                desc: "テーマ別コミュニティでリアルタイムにメッセージを交換。オーナーによる名称・公開設定の管理にも対応。",
+                icon: "\uD83E\uDD16",
+                title: "AI法令アシスタント",
+                desc: "法令に関するQ&A・要約・推薦をAIが支援。36,000超の条文をベクトル検索。マルチモデル対応。",
               },
             ].map(({ icon, title, desc }) => (
               <div
@@ -366,33 +366,21 @@ export default function AboutPage() {
                 ],
               },
               {
-                category: "プロジェクト・コミュニティ",
+                category: "逐条解説・AI",
                 items: [
-                  "法令プロジェクト（タスク・フェーズ・ガントチャート）",
-                  "議事録・ファイル添付（R2）",
-                  "チェックリストテンプレート",
-                  "法令案（統合法令の構造化編集）",
-                  "コミュニティ（メッセージ・資料共有）",
-                  "逐条解説の投稿・閲覧",
-                  "チームカレンダー・iCalエクスポート",
+                  "逐条解説の投稿・閲覧（出典付き）",
+                  "AI法令アシスタント（Q&A・要約・推薦）",
+                  "Vectorize AI検索（36,000超の条文）",
+                  "マルチモデルルーティング",
                 ],
               },
               {
                 category: "カレンダー・通知",
                 items: [
-                  "月間カレンダー（公布/施行/タスク/フェーズ期限）",
+                  "月間カレンダー（公布日・施行日の表示）",
                   "施行スケジュール（6ヶ月タイムライン）",
-                  "メール通知（5カテゴリ + スコープ + 頻度設定）",
+                  "メール通知（法令公布・施行アラート + 頻度設定）",
                   "法令公布・施行の自動検知（Cron巡回）",
-                ],
-              },
-              {
-                category: "ゲーミング・カード",
-                items: [
-                  "ゲーミングモード（XPバー・レベル・パーティクル演出）",
-                  "条文カードゲーム（ガチャ・収集・レアリティ）",
-                  "カード図鑑・法令コンプリート",
-                  "端末間データ同期（ログイン時）",
                 ],
               },
             ].map(({ category, items }) => (
@@ -450,8 +438,8 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* W100・50法プロジェクト */}
-        <section id="w100" style={{ marginBottom: "3rem" }}>
+        {/* HIME OS エコシステム */}
+        <section id="hime-os" style={{ marginBottom: "3rem" }}>
           <h2
             style={{
               fontFamily: "var(--font-serif)",
@@ -462,7 +450,7 @@ export default function AboutPage() {
               marginBottom: "1.5rem",
             }}
           >
-            W100・50法プロジェクト
+            HIME OS エコシステム
           </h2>
           <div
             style={{
@@ -483,189 +471,76 @@ export default function AboutPage() {
                 color: "var(--color-text-secondary)",
               }}
             >
-              LexCard は「W100・50法」研究・創作・開発プロジェクトの一環として開発されています。
-              こうな姫株式会社の代表・中川倖成が主宰する本プロジェクトは、知識の分類体系と法制度の再構築を同時に進める取り組みです。
+              LexCard は HIME Systems が提供するエコシステムの一部です。
+              法令検索・閲覧・改正案作成に特化した LexCard と、HIME OS が連携し、
+              法令業務を包括的にサポートします。
             </p>
 
-            {/* W100知識分類法 */}
-            <div>
-              <h3
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: "1rem",
+              }}
+            >
+              <div
                 style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "0.95rem",
-                  fontWeight: 700,
-                  color: "var(--color-text-primary)",
-                  marginBottom: "0.5rem",
+                  padding: "1.25rem",
+                  backgroundColor: "var(--color-bg)",
+                  borderRadius: "8px",
+                  border: "2px solid var(--color-accent)",
                 }}
               >
-                W100知識分類法
-              </h3>
-              <p
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "0.85rem",
-                  lineHeight: 1.8,
-                  color: "var(--color-text-secondary)",
-                }}
-              >
-                W100は、100分野の大分類の中に10の観点から100テーマを内包する独自の知識分類体系です。
-                図書分類（NDC）では不足する学習・教育・研究・実務の基盤として設計され、
-                教育・研究・行政・産業・文化の横断的な知識整理を可能にします。
-                分野コード（CC）・教育テーマ（TT）・学術側面（AA）・細分領域（UU）の4階層で構成されています。
-              </p>
-            </div>
-
-            {/* 50法プロジェクト */}
-            <div>
-              <h3
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "0.95rem",
-                  fontWeight: 700,
-                  color: "var(--color-text-primary)",
-                  marginBottom: "0.5rem",
-                }}
-              >
-                50法プロジェクト
-              </h3>
-              <p
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "0.85rem",
-                  lineHeight: 1.8,
-                  color: "var(--color-text-secondary)",
-                }}
-              >
-                2,000以上の日本の法律を約50の統合法に再編する構想です。
-                憲法・公共基盤（1〜9）、民事・経済（10〜20）、刑事・司法（21〜24）、行政・情報・地域（25〜29）、
-                労働・福祉（30〜34）、産業・資源（35〜40）、国土・交通・防災（41〜45）、教育・文化・環境・外交（46〜50）の8領域で構成。
-                LexCard はこの50法を閲覧・編集・検証するためのツールとして開発されています。
-              </p>
-            </div>
-
-            {/* 著作物 */}
-            <div>
-              <h3
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "0.95rem",
-                  fontWeight: 700,
-                  color: "var(--color-text-primary)",
-                  marginBottom: "0.5rem",
-                }}
-              >
-                著作物
-              </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 <div
                   style={{
-                    padding: "0.75rem 1rem",
-                    backgroundColor: "var(--color-bg)",
-                    borderRadius: "6px",
-                    border: "1px solid var(--color-border)",
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    color: "var(--color-accent)",
+                    marginBottom: "0.4rem",
                   }}
                 >
-                  <div
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "0.85rem",
-                      fontWeight: 600,
-                      color: "var(--color-text-primary)",
-                      marginBottom: "0.25rem",
-                    }}
-                  >
-                    W100知識分類法 公共組織法［分類表・逐条解説］
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "0.78rem",
-                      color: "var(--color-text-secondary)",
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    B5・296頁｜サークル たぴたぴとりっぷ｜コミックマーケット107（2025.12.31）
-                  </div>
-                  <div
-                    style={{
-                      marginTop: "0.5rem",
-                      display: "flex",
-                      gap: "0.5rem",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <a
-                      href="https://www.melonbooks.co.jp/detail/detail.php?product_id=3362530"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        fontFamily: "var(--font-sans)",
-                        fontSize: "0.78rem",
-                        color: "var(--color-accent)",
-                        textDecoration: "none",
-                      }}
-                    >
-                      メロンブックス →
-                    </a>
-                    <a
-                      href="https://ndlsearch.ndl.go.jp/books/R100000002-I034490094#store"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        fontFamily: "var(--font-sans)",
-                        fontSize: "0.78rem",
-                        color: "var(--color-accent)",
-                        textDecoration: "none",
-                      }}
-                    >
-                      国立国会図書館サーチ →
-                    </a>
-                  </div>
+                  LexCard
                 </div>
                 <div
                   style={{
-                    padding: "0.75rem 1rem",
-                    backgroundColor: "var(--color-bg)",
-                    borderRadius: "6px",
-                    border: "1px solid var(--color-border)",
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "0.82rem",
+                    color: "var(--color-text-secondary)",
+                    lineHeight: 1.7,
                   }}
                 >
-                  <div
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "0.85rem",
-                      fontWeight: 600,
-                      color: "var(--color-text-primary)",
-                      marginBottom: "0.25rem",
-                    }}
-                  >
-                    2050年までに実現したい政策
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "0.78rem",
-                      color: "var(--color-text-secondary)",
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    2019年刊行｜共通試験法・教育庁法等を構想した前著
-                  </div>
-                  <div style={{ marginTop: "0.5rem" }}>
-                    <a
-                      href="https://note.com/kouna_alice/m/me3f9067b56a2"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        fontFamily: "var(--font-sans)",
-                        fontSize: "0.78rem",
-                        color: "var(--color-accent)",
-                        textDecoration: "none",
-                      }}
-                    >
-                      note マガジン →
-                    </a>
-                  </div>
+                  法令検索・閲覧・改正案作成・逐条解説・AI検索に特化した法令アクセス基盤。
+                </div>
+              </div>
+              <div
+                style={{
+                  padding: "1.25rem",
+                  backgroundColor: "var(--color-bg)",
+                  borderRadius: "8px",
+                  border: "1px solid var(--color-border)",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    color: "var(--color-text-primary)",
+                    marginBottom: "0.4rem",
+                  }}
+                >
+                  HIME OS
+                </div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "0.82rem",
+                    color: "var(--color-text-secondary)",
+                    lineHeight: 1.7,
+                  }}
+                >
+                  知識分類・プロジェクト管理・コミュニケーションを統合したインテント・ベースOS。
                 </div>
               </div>
             </div>

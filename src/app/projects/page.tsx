@@ -36,8 +36,7 @@ export default async function ProjectsPage() {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("projects")
     .select(
       "id, title, description, law_ids, owner_name, status, visibility, phase_deadlines, created_at, updated_at",
@@ -45,7 +44,7 @@ export default async function ProjectsPage() {
     .order("updated_at", { ascending: false })
     .limit(100);
 
-  const projects: ProjectRow[] = error ? [] : (data ?? []);
+  const projects: ProjectRow[] = error ? [] : ((data ?? []) as unknown as ProjectRow[]);
 
   // 法令名をまとめて取得
   const allLawIds = [...new Set(projects.flatMap((p) => p.law_ids))];

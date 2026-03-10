@@ -24,8 +24,7 @@ export async function GET(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: member } = await (admin as any)
+  const { data: member } = await admin
     .from("member_profiles")
     .select("id, password_reset_token")
     .eq("id", memberId)
@@ -42,8 +41,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Mark email as verified
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (admin as any)
+  await admin
     .from("member_profiles")
     .update({
       email_verified: true,
@@ -77,8 +75,7 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: member } = await (admin as any)
+  const { data: member } = await admin
     .from("member_profiles")
     .select("id, name, email, email_verified")
     .eq("id", memberId)
@@ -96,8 +93,7 @@ export async function POST(request: NextRequest) {
   const { raw, hashed } = await generateOneTimeToken();
   const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (admin as any)
+  await admin
     .from("member_profiles")
     .update({
       password_reset_token: hashed,

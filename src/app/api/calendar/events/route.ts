@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import type { ProjectTask } from "@/types/database";
 
 /**
  * GET /api/calendar/events?member_id=UUID&from=YYYY-MM-DD&to=YYYY-MM-DD
@@ -33,8 +34,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = createAdminClient() as any;
+    const db = createAdminClient();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let projects: any[] = [];
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       const { data: member } = await db
         .from("member_profiles")
         .select("id, name, org")
-        .eq("id", memberId)
+        .eq("id", memberId!)
         .single();
 
       if (!member) return NextResponse.json({ events: [] });
@@ -70,8 +70,7 @@ export async function GET(request: NextRequest) {
 
     // ── 1. タスクイベント ──
     for (const proj of projects) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const tasks = (proj.tasks ?? []) as any[];
+      const tasks = (proj.tasks ?? []) as unknown as ProjectTask[];
       for (const task of tasks) {
         if (!task.due) continue;
         if (task.due < from || task.due > to) continue;
@@ -117,7 +116,7 @@ export async function GET(request: NextRequest) {
       for (const alert of lawAlerts ?? []) {
         events.push({
           id: `law-${alert.id}`,
-          type: alert.alert_type,
+          type: alert.alert_type as CalendarEvent["type"],
           date: alert.law_date,
           title: alert.law_title,
           subtitle: alert.law_num,

@@ -17,8 +17,7 @@ async function auth(req: NextRequest): Promise<string | null> {
 export async function GET(req: NextRequest) {
   const memberId = req.nextUrl.searchParams.get("member_id");
   const formId = req.nextUrl.searchParams.get("id");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createAdminClient() as any;
+  const db = createAdminClient();
 
   if (formId) {
     const { data } = await db.from("ws_forms").select("*").eq("id", formId).single();
@@ -39,8 +38,7 @@ export async function POST(req: NextRequest) {
   const memberId = await auth(req);
   if (!memberId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const body = await req.json();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createAdminClient() as any;
+  const db = createAdminClient();
   const { data, error } = await db
     .from("ws_forms")
     .insert({
@@ -63,8 +61,7 @@ export async function PATCH(req: NextRequest) {
   if (!memberId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const body = await req.json();
   if (!body.id) return NextResponse.json({ error: "id required" }, { status: 400 });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createAdminClient() as any;
+  const db = createAdminClient();
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (body.title !== undefined) updates.title = body.title;
   if (body.description !== undefined) updates.description = body.description;
@@ -85,8 +82,7 @@ export async function DELETE(req: NextRequest) {
   if (!memberId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createAdminClient() as any;
+  const db = createAdminClient();
   const { error } = await db.from("ws_forms").delete().eq("id", id).eq("member_id", memberId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });

@@ -16,8 +16,7 @@ async function getAdminMember(request: NextRequest) {
   const valid = await verifySessionToken(memberId, token);
   if (!valid) return null;
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (admin as any)
+  const { data } = await admin
     .from("member_profiles")
     .select("id, name, role")
     .eq("id", memberId)
@@ -38,8 +37,7 @@ export async function GET(request: NextRequest) {
 
   const section = request.nextUrl.searchParams.get("section") ?? "stats";
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any;
+  const db = admin;
 
   if (section === "stats") {
     const [members, patches, projects, communities, commentaries, contacts] = await Promise.all([
@@ -139,8 +137,9 @@ export async function PATCH(request: NextRequest) {
   }
 
   const admin = createAdminClient();
+  // Dynamic table name — can't be statically typed
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any).from(table).update(updates).eq("id", id);
+  const { error } = await (admin.from(table) as any).update(updates).eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
@@ -166,8 +165,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any).from(table).delete().eq("id", id);
+  const { error } = await admin.from(table).delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

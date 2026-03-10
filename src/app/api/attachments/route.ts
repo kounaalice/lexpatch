@@ -31,8 +31,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = createAdminClient() as any;
+    const db = createAdminClient();
     const { data, error } = await db
       .from("attachments")
       .select("id, filename, original_name, content_type, size_bytes, uploaded_by_name, created_at")
@@ -89,8 +88,7 @@ export async function POST(request: NextRequest) {
     }
 
     // メンバーシップ確認
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = createAdminClient() as any;
+    const db = createAdminClient();
 
     if (contextType === "community") {
       const { data: membership } = await db
@@ -123,8 +121,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "プロジェクトが見つかりません" }, { status: 404 });
       }
 
-      const isMember = (project.members ?? []).some(
-        (m: { name: string; org: string }) => m.name === member.name && m.org === member.org,
+      const isMember = ((project.members ?? []) as { name: string; org: string }[]).some(
+        (m) => m.name === member.name && m.org === member.org,
       );
       if (!isMember) {
         return NextResponse.json(

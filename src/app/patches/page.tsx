@@ -33,8 +33,7 @@ export default async function PatchesPage() {
   }
 
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("patches")
     .select(
       "id, title, status, target_articles, law_id, law_title, created_at, sources(id, tier, label, url)",

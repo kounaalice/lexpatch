@@ -4,6 +4,9 @@ import { hashPassword, verifySessionToken } from "@/lib/crypto";
 import { sendTaskAlertEmail } from "@/lib/mail";
 import { mergePrefs, isImmediateEnabled } from "@/lib/notification-prefs";
 import { logger } from "@/lib/logger";
+import type { Database, ProjectTask } from "@/types/database";
+
+type ProjectRow = Database["public"]["Tables"]["projects"]["Row"];
 
 function isSupabaseConfigured() {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -19,8 +22,7 @@ export async function GET(request: NextRequest) {
   const admin = createAdminClient();
 
   if (id) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (admin as any)
+    const { data, error } = await admin
       .from("projects")
       .select("*, project_notes(*)")
       .eq("id", id)
@@ -33,8 +35,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (admin as any)
+  let query = admin
     .from("projects")
     .select(
       "id, title, description, law_ids, owner_name, visibility, status, phase_deadlines, created_at, updated_at",
@@ -98,12 +99,7 @@ export async function POST(request: NextRequest) {
     insertData.access_password_hash = await hashPassword(body.access_password);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
-    .from("projects")
-    .insert(insertData)
-    .select()
-    .single();
+  const { data, error } = await admin.from("projects").insert(insertData).select().single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data, { status: 201 });
@@ -163,8 +159,7 @@ export async function PATCH(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let oldTasks: any[] | null = null;
   if (body.tasks !== undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existing } = await (admin as any)
+    const { data: existing } = await admin
       .from("projects")
       .select("tasks, title, members")
       .eq("id", id)
@@ -179,25 +174,23 @@ export async function PATCH(request: NextRequest) {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("projects")
     .update(updates)
     .eq("id", id)
-    .select();
+    .select()
+    .returns<ProjectRow[]>();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // ─── タスク変更時のメール通知 ───
   if (body.tasks !== undefined && oldTasks && data?.[0]) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const newTasks = (body.tasks as any[]) ?? [];
+      const newTasks = (body.tasks as unknown as ProjectTask[]) ?? [];
       const project = data[0];
       const projectTitle = project.title ?? "プロジェクト";
 
       // 新規割当を検知（旧タスクにないID、または assignee が変わったもの）
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const oldMap = new Map(oldTasks.map((t: any) => [t.id, t]));
+      const oldMap = new Map((oldTasks as unknown as ProjectTask[]).map((t) => [t.id, t]));
 
       const alerts: {
         assignee: string;
@@ -206,8 +199,7 @@ export async function PATCH(request: NextRequest) {
         due?: string;
       }[] = [];
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const nt of newTasks as any[]) {
+      for (const nt of newTasks) {
         const old = oldMap.get(nt.id);
         if (!old && nt.assignee) {
           // 新規タスクで担当者あり
@@ -237,8 +229,7 @@ export async function PATCH(request: NextRequest) {
       if (alerts.length > 0) {
         // 担当者名 → メンバー情報をDB検索
         const assigneeNames = [...new Set(alerts.map((a) => a.assignee))];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: members } = await (admin as any)
+        const { data: members } = await admin
           .from("member_profiles")
           .select("id, name, email, notification_prefs")
           .in("name", assigneeNames)

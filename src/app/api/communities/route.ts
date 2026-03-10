@@ -3,6 +3,9 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { verifySessionToken } from "@/lib/crypto";
 import { validateRequest, communitySchema } from "@/lib/validation";
 import { z } from "zod";
+import type { Database } from "@/types/database";
+
+type CommunityDbRow = Database["public"]["Tables"]["communities"]["Row"];
 
 function isSupabaseConfigured() {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -17,8 +20,7 @@ export async function GET(request: NextRequest) {
   const memberId = request.nextUrl.searchParams.get("member_id");
   const admin = createAdminClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: communities, error } = await (admin as any)
+  const { data: communities, error } = await admin
     .from("communities")
     .select("*, community_members(count)")
     .order("updated_at", { ascending: false })
@@ -29,8 +31,7 @@ export async function GET(request: NextRequest) {
   // メンバーの参加状況
   let joinedIds = new Set<string>();
   if (memberId) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: memberships } = await (admin as any)
+    const { data: memberships } = await admin
       .from("community_members")
       .select("community_id")
       .eq("member_id", memberId);
@@ -81,8 +82,7 @@ export async function POST(request: NextRequest) {
   const body = validation.data;
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("communities")
     .insert({
       name: body.name.trim(),
@@ -91,13 +91,13 @@ export async function POST(request: NextRequest) {
       owner_member_id: body.owner_member_id,
     })
     .select()
+    .returns<CommunityDbRow[]>()
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // 作成者を自動メンバー追加
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (admin as any)
+  await admin
     .from("community_members")
     .insert({ community_id: data.id, member_id: body.owner_member_id });
 
@@ -125,8 +125,7 @@ export async function PATCH(request: NextRequest) {
   if (body.visibility !== undefined) updates.visibility = body.visibility;
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any).from("communities").update(updates).eq("id", id);
+  const { error } = await admin.from("communities").update(updates).eq("id", id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
@@ -142,8 +141,7 @@ export async function DELETE(request: NextRequest) {
   if (!id) return NextResponse.json({ error: "id が必要です" }, { status: 400 });
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any;
+  const db = admin;
 
   // 権限チェック
   const auth = request.headers.get("authorization")?.replace("Bearer ", "");

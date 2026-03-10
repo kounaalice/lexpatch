@@ -9,8 +9,7 @@ export async function GET(req: NextRequest) {
   }
 
   const supabase = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("consolidated_laws")
     .select("*")
     .eq("project_id", projectId)
@@ -33,8 +32,7 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("consolidated_laws")
     .insert({
       project_id,
@@ -71,8 +69,7 @@ export async function PATCH(req: NextRequest) {
   allowed.updated_at = new Date().toISOString();
 
   const supabase = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("consolidated_laws")
     .update(allowed)
     .eq("id", id)

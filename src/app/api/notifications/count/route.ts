@@ -11,8 +11,7 @@ export async function GET(request: NextRequest) {
   if (!memberId) return NextResponse.json({ count: 0 });
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = createAdminClient() as any;
+    const db = createAdminClient();
 
     // メンバー情報
     const { data: member } = await db
@@ -50,7 +49,7 @@ export async function GET(request: NextRequest) {
       const targetType = n.target_type ?? "all";
       if (targetType === "org_type") {
         const orgTypes = (n.target_filter as { org_types?: string[] })?.org_types ?? [];
-        if (!orgTypes.includes(member.org_type)) return false;
+        if (!orgTypes.includes(member.org_type ?? "")) return false;
       } else if (targetType === "individual") {
         const memberIds = (n.target_filter as { member_ids?: string[] })?.member_ids ?? [];
         if (!memberIds.includes(member.id)) return false;

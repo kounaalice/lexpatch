@@ -6,8 +6,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ formId: string }> }) {
   const { formId } = await params;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createAdminClient() as any;
+  const db = createAdminClient();
   const { data } = await db
     .from("ws_form_responses")
     .select("*")
@@ -18,8 +17,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ form
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ formId: string }> }) {
   const { formId } = await params;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createAdminClient() as any;
+  const db = createAdminClient();
 
   // Verify form exists and is published
   const { data: form } = await db.from("ws_forms").select("status").eq("id", formId).single();

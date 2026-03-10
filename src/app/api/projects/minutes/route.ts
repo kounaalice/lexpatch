@@ -7,8 +7,7 @@ function isSupabaseConfigured() {
 
 function db() {
   // meeting_minutes table is not in Database type definition
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return createAdminClient() as any;
+  return createAdminClient();
 }
 
 /** GET — プロジェクトの議事録一覧 */

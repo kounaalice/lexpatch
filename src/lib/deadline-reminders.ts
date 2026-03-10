@@ -54,8 +54,7 @@ interface ReminderResult {
 // ─── メイン関数 ──────────────────────────────────────────────
 
 export async function checkDeadlineReminders(): Promise<ReminderResult> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createAdminClient() as any;
+  const db = createAdminClient();
   const result: ReminderResult = {
     scanned_projects: 0,
     due_soon_tasks: 0,
@@ -137,7 +136,7 @@ export async function checkDeadlineReminders(): Promise<ReminderResult> {
 
   const sentKeys = new Set(
     (recentSends ?? []).map(
-      (s: { project_id: string; task_id: string; member_id: string; alert_type: string }) =>
+      (s: { project_id: string; task_id: string; member_id: string | null; alert_type: string }) =>
         `${s.project_id}:${s.task_id}:${s.member_id}:${s.alert_type}`,
     ),
   );

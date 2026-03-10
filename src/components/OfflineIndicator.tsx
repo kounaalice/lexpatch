@@ -1,27 +1,60 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
+async function checkConnectivity(): Promise<boolean> {
+  try {
+    const res = await fetch("/api/ping", { method: "HEAD", cache: "no-store" });
+    return res.ok || res.status === 204;
+  } catch {
+    return false;
+  }
+}
 
 export function OfflineIndicator() {
-  const [isOffline, setIsOffline] = useState(() =>
-    typeof navigator !== "undefined" ? !navigator.onLine : false,
-  );
+  const [isOffline, setIsOffline] = useState(false);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" ? window.matchMedia("(max-width: 767px)").matches : false,
   );
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    const update = () => setIsOffline(!navigator.onLine);
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
+    const clearPending = () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      if (abortRef.current) {
+        abortRef.current.abort();
+        abortRef.current = null;
+      }
+    };
+
+    const handleOnline = () => {
+      clearPending();
+      setIsOffline(false);
+    };
+
+    const handleOffline = () => {
+      clearPending();
+      timerRef.current = setTimeout(async () => {
+        const online = await checkConnectivity();
+        if (!online) setIsOffline(true);
+      }, 3000);
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     const mq = window.matchMedia("(max-width: 767px)");
     const mqHandler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener("change", mqHandler);
 
     return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
+      clearPending();
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
       mq.removeEventListener("change", mqHandler);
     };
   }, []);

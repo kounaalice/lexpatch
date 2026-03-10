@@ -27,8 +27,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "member_id is required" }, { status: 400 });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sb = createAdminClient() as any;
+  const sb = createAdminClient();
 
   // メンバー情報取得
   const { data: profile } = await sb
@@ -66,15 +65,18 @@ export async function GET(request: NextRequest) {
 
   for (const proj of projects) {
     // メンバーチェック: members配列に含まれるか
-    const members = Array.isArray(proj.members) ? proj.members : [];
+    const members = Array.isArray(proj.members)
+      ? (proj.members as { name: string; org?: string }[])
+      : [];
     const isMember = members.some(
-      (m: { name: string; org?: string }) =>
-        m.name === profile.name && (m.org || "") === (profile.org || ""),
+      (m) => m.name === profile.name && (m.org || "") === (profile.org || ""),
     );
     if (!isMember) continue;
 
     // タスク抽出
-    const tasks: ProjectTask[] = Array.isArray(proj.tasks) ? proj.tasks : [];
+    const tasks: ProjectTask[] = Array.isArray(proj.tasks)
+      ? (proj.tasks as unknown as ProjectTask[])
+      : [];
     for (const t of tasks) {
       if (t.done) continue;
       result.push({

@@ -23,8 +23,7 @@ export async function NewsFeed() {
 
   const admin = createAdminClient();
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = admin as any;
+    const db = admin;
     const [projectsRes, patchesRes, commentariesRes, communitiesRes] = await Promise.all([
       db
         .from("projects")
@@ -64,7 +63,7 @@ export async function NewsFeed() {
         type: "patch",
         id: p.id,
         title: p.title,
-        subtitle: p.law_title,
+        subtitle: p.law_title ?? undefined,
         date: p.created_at,
         href: `/patch/${p.id}`,
       });

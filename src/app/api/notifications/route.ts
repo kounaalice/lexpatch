@@ -3,6 +3,9 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { sendNotificationEmail } from "@/lib/mail";
 import { mergePrefs, isImmediateEnabled, getNotificationEmail } from "@/lib/notification-prefs";
 import { logger } from "@/lib/logger";
+import type { Database, ProjectMember } from "@/types/database";
+
+type NotificationRow = Database["public"]["Tables"]["notifications"]["Row"];
 
 function isSupabaseConfigured() {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -22,8 +25,7 @@ export async function GET(request: NextRequest) {
   const admin = createAdminClient();
 
   // メンバー情報取得（org_type確認用）
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: member } = await (admin as any)
+  const { data: member } = await admin
     .from("member_profiles")
     .select("id, name, org, org_type")
     .eq("id", memberId)
@@ -34,8 +36,7 @@ export async function GET(request: NextRequest) {
   // project_idなし → 全PJ横断の未読数
   if (!projectId) {
     // まずメンバーが所属するプロジェクトを取得
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: projects } = await (admin as any)
+    const { data: projects } = await admin
       .from("projects")
       .select("id")
       .contains("members", [{ name: member.name, org: member.org }]);
@@ -45,8 +46,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ unread_count: 0, notifications: [] });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: notifs } = await (admin as any)
+    const { data: notifs } = await admin
       .from("notifications")
       .select("*, notification_reads!left(member_id)")
       .in("project_id", projectIds)
@@ -72,8 +72,7 @@ export async function GET(request: NextRequest) {
     }));
 
     // プロジェクト名マップ
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: projectRows } = await (admin as any)
+    const { data: projectRows } = await admin
       .from("projects")
       .select("id, title")
       .in("id", projectIds);
@@ -86,8 +85,7 @@ export async function GET(request: NextRequest) {
   }
 
   // project_idあり → そのPJのお知らせ一覧
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: notifs, error } = await (admin as any)
+  const { data: notifs, error } = await admin
     .from("notifications")
     .select("*, notification_reads!left(member_id)")
     .eq("project_id", projectId)
@@ -123,8 +121,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "必須パラメータが不足しています" }, { status: 400 });
     }
     const admin = createAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (admin as any).from("notification_reads").upsert(
+    await admin.from("notification_reads").upsert(
       {
         notification_id: body.notification_id,
         member_id: body.member_id,
@@ -148,18 +145,19 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("notifications")
     .insert({
+      member_id: body.sender_member_id,
       project_id: body.project_id,
       sender_member_id: body.sender_member_id,
       title: body.title.trim(),
       content: body.content.trim(),
       target_type: body.target_type ?? "all",
-      target_filter: body.target_filter ?? {},
+      target_filter: (body.target_filter ?? {}) as import("@/types/database").Json,
     })
     .select()
+    .returns<NotificationRow[]>()
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -167,24 +165,18 @@ export async function POST(request: NextRequest) {
   // ─── メール配信（fire-and-forget within request） ───
   try {
     // プロジェクト情報取得
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: project } = await (admin as any)
+    const { data: project } = await admin
       .from("projects")
       .select("id, title, members")
       .eq("id", body.project_id)
       .single();
 
     if (project) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const memberEntries = (project.members as any[]) ?? [];
-      const projectMemberSet = new Set(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        memberEntries.map((m: any) => `${m.name}___${m.org}`),
-      );
+      const memberEntries = (project.members as unknown as ProjectMember[]) ?? [];
+      const projectMemberSet = new Set(memberEntries.map((m) => `${m.name}___${m.org}`));
 
       // メール通知有効なメンバーを取得
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: emailMembers } = await (admin as any)
+      const { data: emailMembers } = await admin
         .from("member_profiles")
         .select("id, name, org, org_type, email, notification_prefs")
         .not("email", "is", null);
@@ -231,12 +223,12 @@ export async function POST(request: NextRequest) {
 
 // 対象判定ヘルパー
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isTargeted(notification: any, member: { id: string; org_type: string }): boolean {
+function isTargeted(notification: any, member: { id: string; org_type: string | null }): boolean {
   const targetType = notification.target_type ?? "all";
   if (targetType === "all") return true;
   if (targetType === "org_type") {
     const orgTypes = (notification.target_filter as { org_types?: string[] })?.org_types ?? [];
-    return orgTypes.includes(member.org_type);
+    return orgTypes.includes(member.org_type ?? "");
   }
   if (targetType === "individual") {
     const memberIds = (notification.target_filter as { member_ids?: string[] })?.member_ids ?? [];

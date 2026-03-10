@@ -11,6 +11,7 @@ import { validateCsrf } from "@/lib/csrf";
 import { sendEmailVerificationEmail } from "@/lib/mail";
 import { validateRequest, registerSchema } from "@/lib/validation";
 import { logger } from "@/lib/logger";
+import type { ProjectMember, ProjectTask } from "@/types/database";
 
 function isSupabaseConfigured() {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -73,8 +74,7 @@ export async function GET(request: NextRequest) {
   let isOwner = false;
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("member_profiles")
     .select(
       "id, name, org, org_type, bio, experience, preferred_areas, email, email_verified, notification_prefs, situation_profile, gaming_profile, avatar_url, auth_provider, password_hash, created_at, updated_at",
@@ -94,27 +94,26 @@ export async function GET(request: NextRequest) {
   }
 
   // 横断プロジェクト検索
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: projects } = await (admin as any)
+  const { data: projects } = await admin
     .from("projects")
     .select("id, title, status, members, tasks, updated_at")
     .contains("members", [{ name, org }])
     .order("updated_at", { ascending: false });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const projectSummaries = (projects ?? []).map((p: any) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const memberEntry = (p.members as any[])?.find((m: any) => m.name === name && m.org === org);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const assignedTasks = (p.tasks as any[])?.filter((t: any) => t.assignee === name) ?? [];
+  const projectSummaries = (projects ?? []).map((p) => {
+    const memberEntry = (p.members as unknown as ProjectMember[])?.find(
+      (m) => m.name === name && m.org === org,
+    );
+    const assignedTasks =
+      (p.tasks as unknown as ProjectTask[])?.filter((t) => t.assignee === name) ?? [];
     return {
       id: p.id,
       title: p.title,
       status: p.status,
       role: memberEntry?.role ?? "",
-      tasksDone: assignedTasks.filter((t: { done: boolean }) => t.done).length,
+      tasksDone: assignedTasks.filter((t) => t.done).length,
       tasksTotal: assignedTasks.length,
-      tasks: assignedTasks.map((t: { id: string; title: string; done: boolean; due?: string }) => ({
+      tasks: assignedTasks.map((t) => ({
         id: t.id,
         title: t.title,
         done: t.done,
@@ -126,19 +125,18 @@ export async function GET(request: NextRequest) {
   // コミュニティ参加情報
   let communities: { id: string; name: string; member_count: number }[] = [];
   if (data?.id) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: memberships } = await (admin as any)
+    const { data: memberships } = await admin
       .from("community_members")
       .select("community_id, communities(id, name)")
       .eq("member_id", data.id);
     if (memberships) {
       communities = memberships
         .map((m: { communities?: { id: string; name: string } }) => ({
-          id: m.communities?.id,
-          name: m.communities?.name,
+          id: m.communities?.id as string,
+          name: m.communities?.name as string,
           member_count: 0,
         }))
-        .filter((c: { id: string | undefined }) => c.id);
+        .filter((c) => c.id);
     }
   }
 
@@ -174,8 +172,7 @@ export async function POST(request: NextRequest) {
   const admin = createAdminClient();
   const passwordHash = await hashPassword(body.password);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("member_profiles")
     .insert({
       name: body.name.trim(),
@@ -214,8 +211,7 @@ export async function POST(request: NextRequest) {
   try {
     const { raw, hashed } = await generateOneTimeToken();
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (admin as any)
+    await admin
       .from("member_profiles")
       .update({
         password_reset_token: hashed,
@@ -226,7 +222,7 @@ export async function POST(request: NextRequest) {
     const origin = request.headers.get("origin") || "https://lexcard.jp";
     const verifyUrl = `${origin}/api/auth/verify-email?token=${encodeURIComponent(raw)}&id=${encodeURIComponent(data.id)}`;
     await sendEmailVerificationEmail({
-      to: data.email,
+      to: data.email!,
       memberName: data.name,
       verifyUrl,
     });
@@ -277,11 +273,10 @@ export async function PUT(request: NextRequest) {
     }
 
     const admin = createAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (admin as any)
+    const { error } = await admin
       .from("member_profiles")
       .update({
-        gaming_profile: body.gaming_profile,
+        gaming_profile: body.gaming_profile as import("@/types/database").Json,
         updated_at: new Date().toISOString(),
       })
       .eq("id", body.memberId);
@@ -345,8 +340,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "新しいパスワードは8文字以上必要です" }, { status: 400 });
     }
     const adminPw = createAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: pwData } = await (adminPw as any)
+    const { data: pwData } = await adminPw
       .from("member_profiles")
       .select("password_hash")
       .eq("id", memberId)
@@ -401,8 +395,7 @@ export async function PATCH(request: NextRequest) {
   if (body.notification_prefs !== undefined) {
     // 既存の prefs とマージして保存
     const admin2 = createAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: current } = await (admin2 as any)
+    const { data: current } = await admin2
       .from("member_profiles")
       .select("notification_prefs")
       .eq("id", memberId)
@@ -418,8 +411,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any).from("member_profiles").update(updates).eq("id", memberId);
+  const { error } = await admin.from("member_profiles").update(updates).eq("id", memberId);
 
   if (error) {
     if (error.code === "23505" && error.message?.includes("email")) {

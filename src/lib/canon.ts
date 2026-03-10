@@ -64,8 +64,7 @@ export async function saveCanonSnapshot(law: StructuredLaw): Promise<string | nu
     await ensureLawRow(admin, law);
 
     // スナップショット挿入
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (admin as any)
+    const { data, error } = await admin
       .from("canons")
       .insert({
         law_id: law.law_id,
@@ -79,7 +78,7 @@ export async function saveCanonSnapshot(law: StructuredLaw): Promise<string | nu
           enforcement_date: law.enforcement_date,
           chapters: law.chapters,
           articles: law.articles,
-        },
+        } as unknown as import("@/types/database").Json,
       })
       .select("id")
       .single();
@@ -106,8 +105,7 @@ export async function getCanonVersions(
 ): Promise<Array<{ id: string; version: string; released_at: string }>> {
   try {
     const admin = createAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (admin as any)
+    const { data, error } = await admin
       .from("canons")
       .select("id, version, released_at")
       .eq("law_id", lawId)

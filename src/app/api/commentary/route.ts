@@ -27,8 +27,7 @@ export async function GET(request: NextRequest) {
 
   // グローバル件数取得
   if (request.nextUrl.searchParams.get("count") === "true") {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { count, error } = await (admin as any)
+    const { count, error } = await admin
       .from("commentaries")
       .select("id", { count: "exact", head: true });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -41,8 +40,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "law_id と article_title が必要です" }, { status: 400 });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("commentaries")
     .select(
       "id, law_id, article_title, content, author_name, member_id, sources, created_at, updated_at",
@@ -81,8 +79,7 @@ export async function POST(request: NextRequest) {
   };
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (admin as any)
+  const { data, error } = await admin
     .from("commentaries")
     .insert({
       law_id: lawId,
@@ -114,8 +111,7 @@ export async function PATCH(request: NextRequest) {
   if (!id) return NextResponse.json({ error: "id が必要です" }, { status: 400 });
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any;
+  const db = admin;
 
   // 所有権チェック（member_id が設定されている場合は本人 or admin/moderator のみ）
   const { data: existing } = await db
@@ -168,8 +164,7 @@ export async function DELETE(request: NextRequest) {
   if (!id) return NextResponse.json({ error: "id が必要です" }, { status: 400 });
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any;
+  const db = admin;
 
   // 所有権チェック
   const { data: existing } = await db

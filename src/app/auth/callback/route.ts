@@ -49,8 +49,7 @@ export async function GET(request: NextRequest) {
     const admin = createAdminClient();
 
     // Check if email already linked to an existing member_profile
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existing } = await (admin as any)
+    const { data: existing } = await admin
       .from("member_profiles")
       .select("id, name, org, org_type, role, auth_provider")
       .eq("email", email.toLowerCase())
@@ -68,13 +67,12 @@ export async function GET(request: NextRequest) {
       memberId = existing.id;
       memberName = existing.name;
       memberOrg = existing.org;
-      memberOrgType = existing.org_type;
+      memberOrgType = existing.org_type ?? "";
       memberRole = existing.role ?? "member";
 
       // Update provider info (only for OAuth, not magic link on local accounts)
       if (!isMagicLink && existing.auth_provider !== providerLabel) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (admin as any)
+        await admin
           .from("member_profiles")
           .update({
             auth_provider: providerLabel,
@@ -86,8 +84,7 @@ export async function GET(request: NextRequest) {
           .eq("id", existing.id);
       } else if (isMagicLink) {
         // Magic link verifies email
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (admin as any)
+        await admin
           .from("member_profiles")
           .update({
             email_verified: true,
@@ -98,8 +95,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Create new member_profile
       let finalName = oauthName;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: nameCheck } = await (admin as any)
+      const { data: nameCheck } = await admin
         .from("member_profiles")
         .select("id")
         .eq("name", finalName)
@@ -112,8 +108,7 @@ export async function GET(request: NextRequest) {
 
       const passwordHash = isMagicLink ? "magiclink" : `oauth:${providerLabel}`;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: newMember, error: insertError } = await (admin as any)
+      const { data: newMember, error: insertError } = await admin
         .from("member_profiles")
         .insert({
           name: finalName,

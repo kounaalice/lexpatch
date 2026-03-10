@@ -11,6 +11,7 @@
 
 import { logger } from "./logger";
 import { createAdminClient } from "./supabase/server";
+import type { Json } from "@/types/database";
 
 export type AuditAction =
   // 認証
@@ -74,15 +75,14 @@ async function persistToSupabase(entry: AuditEntry): Promise<void> {
   try {
     const supabase = createAdminClient();
 
-    const detail: Record<string, unknown> = {
-      ...(entry.detail ?? {}),
+    const detail: { [key: string]: Json | undefined } = {
+      ...(entry.detail as { [key: string]: Json | undefined } | undefined),
       result: entry.result,
       ...(entry.resource.name ? { resource_name: entry.resource.name } : {}),
       ...(entry.actor.role ? { actor_role: entry.actor.role } : {}),
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Database型にRelationshipsが未定義のため
-    const { error } = await (supabase.from("audit_logs") as any).insert({
+    const { error } = await supabase.from("audit_logs").insert({
       action: entry.action,
       actor_id: entry.actor.id === "anonymous" ? null : entry.actor.id,
       actor_name: entry.actor.name ?? null,

@@ -103,6 +103,25 @@ export const communitySchema = z.object({
   isPublic: z.boolean().default(true),
 });
 
+// ─── 営業お断り ──────────────────────────────────────────
+
+const okotowariReason = z.enum(["phone", "visit", "email_spam", "dm", "fax", "sns", "other"]);
+
+export const okotowariCreateSchema = z.object({
+  company_name: safeString(200),
+  company_email: email.optional(),
+  company_phone: safeString(30).optional(),
+  company_address: safeString(500).optional(),
+  reason: okotowariReason,
+  reason_detail: safeString(500).optional(),
+});
+
+export const okotowariReportSchema = z.object({
+  contact_method: okotowariReason,
+  description: safeString(1000),
+  evidence_note: safeString(1000).optional(),
+});
+
 // ─── エラーレポート ──────────────────────────────────────
 
 export const errorReportSchema = z.object({

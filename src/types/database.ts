@@ -20,6 +20,7 @@ export interface Database {
           fetched_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["laws"]["Insert"]>;
+        Relationships: [];
       };
       canons: {
         Row: {
@@ -34,6 +35,7 @@ export interface Database {
           released_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["canons"]["Insert"]>;
+        Relationships: [];
       };
       patches: {
         Row: {
@@ -61,6 +63,7 @@ export interface Database {
           canon_id?: string;
         };
         Update: Partial<Database["public"]["Tables"]["patches"]["Insert"]>;
+        Relationships: [];
       };
       sources: {
         Row: {
@@ -74,6 +77,7 @@ export interface Database {
         };
         Insert: Omit<Database["public"]["Tables"]["sources"]["Row"], "id"> & { id?: string };
         Update: Partial<Database["public"]["Tables"]["sources"]["Insert"]>;
+        Relationships: [];
       };
       discussions: {
         Row: {
@@ -88,6 +92,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["discussions"]["Insert"]>;
+        Relationships: [];
       };
       discussion_comments: {
         Row: {
@@ -102,6 +107,7 @@ export interface Database {
           "id" | "created_at"
         > & { id?: string; created_at?: string };
         Update: Partial<Database["public"]["Tables"]["discussion_comments"]["Insert"]>;
+        Relationships: [];
       };
       votes: {
         Row: {
@@ -116,6 +122,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["votes"]["Insert"]>;
+        Relationships: [];
       };
       lint_results: {
         Row: {
@@ -132,6 +139,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["lint_results"]["Insert"]>;
+        Relationships: [];
       };
       projects: {
         Row: {
@@ -182,6 +190,7 @@ export interface Database {
           access_password_hash?: string;
         };
         Update: Partial<Database["public"]["Tables"]["projects"]["Insert"]>;
+        Relationships: [];
       };
       project_notes: {
         Row: {
@@ -196,6 +205,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["project_notes"]["Insert"]>;
+        Relationships: [];
       };
       commentaries: {
         Row: {
@@ -213,6 +223,7 @@ export interface Database {
           "id" | "created_at" | "updated_at" | "sources"
         > & { id?: string; created_at?: string; updated_at?: string; sources?: Json };
         Update: Partial<Database["public"]["Tables"]["commentaries"]["Insert"]>;
+        Relationships: [];
       };
       audit_logs: {
         Row: {
@@ -246,6 +257,7 @@ export interface Database {
           resource_id?: string | null;
           detail?: Json;
         };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

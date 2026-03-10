@@ -277,7 +277,7 @@ export default async function ArticlePage({
         ]),
       );
       existingPatches = patchRes.data ?? [];
-      commentaries = commentaryRes.data ?? [];
+      commentaries = (commentaryRes.data ?? []) as CommentaryRow[];
       relatedProjects = projectRes.data ?? [];
     } catch {
       /* Supabase 未設定・タイムアウト時は空データで表示を続行 */

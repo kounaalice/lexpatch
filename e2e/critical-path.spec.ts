@@ -58,7 +58,7 @@ test.describe("Search flow", () => {
     await searchInput.fill("民法");
 
     // Click the search button (text: "検索")
-    const searchButton = page.getByRole("button", { name: "検索" });
+    const searchButton = page.getByRole("button", { name: "検索", exact: true });
     await searchButton.click();
 
     // Wait for results to appear — the homepage shows inline results
@@ -94,6 +94,8 @@ test.describe("Search flow", () => {
 test.describe("Law viewing", () => {
   // Use 行政手続法 (405AC0000000088) — a relatively small law,
   // statically generated, and fast to load.
+  // CI環境ではe-Gov APIコールが遅いため長めのタイムアウト
+  test.slow();
   const LAW_ID = "405AC0000000088";
   const LAW_TITLE = "行政手続法";
 
@@ -117,10 +119,10 @@ test.describe("Law viewing", () => {
     ).toBeVisible({ timeout: 30_000 });
 
     // Law number should be visible (e.g. "平成5年法律第88号")
-    await expect(page.getByText(/平成5年法律第88号/)).toBeVisible();
+    await expect(page.getByText(/平成5年法律第88号/)).toBeVisible({ timeout: 15_000 });
 
     // The article count ("全 N 条") should be visible
-    await expect(page.getByText(/全 \d+ 条/)).toBeVisible();
+    await expect(page.getByText(/全 \d+ 条/)).toBeVisible({ timeout: 15_000 });
   });
 
   test("article content renders", async ({ page }) => {
@@ -147,7 +149,7 @@ test.describe("Law viewing", () => {
 
     // The e-Gov external link should be visible
     const egovLink = page.getByRole("link", { name: /e-Gov/ });
-    await expect(egovLink).toBeVisible();
+    await expect(egovLink).toBeVisible({ timeout: 15_000 });
     await expect(egovLink).toHaveAttribute(
       "href",
       `https://laws.e-gov.go.jp/law/${LAW_ID}`,
@@ -173,6 +175,7 @@ test.describe("Law viewing", () => {
 });
 
 test.describe("Full user journey", () => {
+  test.slow(); // CI: e-Gov API + search
   test("homepage → search → click result → view law", async ({ page }) => {
     // 1. Start at homepage
     await page.goto("/");
@@ -180,7 +183,7 @@ test.describe("Full user journey", () => {
 
     // 2. Search for "行政手続法"
     await page.locator("#hero-search").fill("行政手続法");
-    await page.getByRole("button", { name: "検索" }).click();
+    await page.getByRole("button", { name: "検索", exact: true }).click();
 
     // 3. Wait for results
     await expect(
